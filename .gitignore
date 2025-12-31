@@ -1,0 +1,62 @@
+# ============================
+# Node / React
+# ============================
+node_modules/
+dist/
+dist-ssr/
+build/
+*.local
+
+# Debug logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Env files
+.env
+.env.*
+!.env.example
+.env.local
+.env.*.local
+
+# ============================
+# ASP.NET Core / .NET
+# ============================
+bin/
+obj/
+*.user
+*.suo
+
+# appsettings (keep only base config)
+appsettings.Development.json
+appsettings.*.json
+appsettings.json
+
+# Static files (if backend hosts frontend)
+wwwroot/
+
+# ============================
+# Test coverage
+# ============================
+coverage/
+
+# ============================
+# Editor / IDE
+# ============================
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ============================
+# OS files
+# ============================
+.DS_Store
+Thumbs.db
