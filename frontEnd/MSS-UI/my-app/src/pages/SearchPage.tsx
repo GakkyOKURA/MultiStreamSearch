@@ -1,17 +1,21 @@
-import YouTubeCard from "../components/youtube/YouTubeCard";
-import TwitchCard from "../components/twitch/TwitchCard";
-import TwitchClipCard from "../components/twitch/TwitchClipCard";
 import { UnifiedVideoCard } from "../components/unified/unifiedVideoCard";
 import { useState, useEffect } from "react";
 import { useDebounce } from "../hooks/useDebounce";
-import { mapYouTubeToUnified } from "../components/unified/youtubeMapper";
-import { mapTwitchStreamToUnified } from "../components/unified/twitchMapper";
+import {
+  mapShortToUnified,
+  mapYouTubeToUnified,
+} from "../components/unified/youtubeMapper";
+import {
+  mapTwitchClipToUnified,
+  mapTwitchStreamToUnified,
+} from "../components/unified/twitchMapper";
 import { mergeAlternating } from "../components/unified/unifiedVideo";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@chakra-ui/react";
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
-  const debouncedQuery = useDebounce(query, 300);
+  const [skipDebounce, setSkipDebounce] = useState(false);
+  const debouncedQuery = useDebounce(query, 300, skipDebounce);
   const [cursor, setCursor] = useState<string | null>(null);
   const [clipCursor, setClipCursor] = useState<string | null>(null);
   const [ytCursor, setYtCursor] = useState<string | null>(null);
@@ -20,7 +24,9 @@ export default function SearchPage() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
     null
   );
-  const [activeTab, setActiveTab] = useState<"live" | "brief">("live");
+  const [currentTab, setCurrentTab] = useState("live");
+  const [isLiveSearchDone, setLiveSearchDone] = useState(false);
+  const [isSnapSearchDone, setSnapSearchDone] = useState(false);
 
   // YouTube
   const [ytResults, setYtResults] = useState<any[]>([]);
@@ -37,15 +43,8 @@ export default function SearchPage() {
   // UnifiedVideo
   const [unifiedResult, setUnifiedResults] = useState<any[]>([]);
 
-  // // YouTube 検索
-  // const searchYouTube = async () => {
-  //   const res = await fetch(
-  //     `https://localhost:7138/api/youtube/search?q=${query}`
-  //   );
-  //   const data = await res.json();
-  //   setYtResults(data.items || []);
-  //   console.log("Youtube検索クエリ:", query);
-  // };
+  // UnifiedVideo(snap)
+  const [snapUnifiedResult, setSnapUnifiedResults] = useState<any[]>([]);
 
   // YouTube 検索
   const searchYouTube = async (isLoadMore = false) => {
@@ -69,7 +68,12 @@ export default function SearchPage() {
 
     setYtCursor(newCursor);
 
-    console.log("YouTube検索:", query, "nextPageToken:", newCursor);
+    // ★ 最新の値を返す（これが重要）
+    // ytResults は次のレンダリングで更新
+    return {
+      items: data.items,
+      nextCursor: newCursor,
+    };
   };
 
   // Twitch 検索
@@ -98,9 +102,12 @@ export default function SearchPage() {
     }
 
     setCursor(newCursor);
-    console.log("Twitch検索クエリ:", selectedCategoryId, "cursor:", newCursor);
-    // setTwitchResults(data.data || []); // Twitch は data.data に入ってる
-    // console.log("Twitch検索クエリ:", selectedCategoryId);
+    // ★ 最新の値を返す（これが重要）
+    // twitchResults は次のレンダリングで更新
+    return {
+      items: data.data,
+      nextCursor: newCursor,
+    };
   };
 
   // YouTubeShort 検索
@@ -125,7 +132,10 @@ export default function SearchPage() {
 
     setYtsCursor(newCursor);
 
-    console.log("YouTube検索:", query, "nextPageToken:", newCursor);
+    return {
+      items: data.items,
+      nextCursor: newCursor,
+    };
   };
 
   // TwitchClip 検索
@@ -154,23 +164,46 @@ export default function SearchPage() {
     }
 
     setClipCursor(newCursor);
-    console.log("Twitch検索クエリ:", selectedCategoryId, "cursor:", newCursor);
+    //console.log("Twitch検索クエリ:", selectedCategoryId, "cursor:", newCursor);
     // setTwitchResults(data.data || []); // Twitch は data.data に入ってる
-    // console.log("Twitch検索クエリ:", selectedCategoryId);
+    return {
+      items: data.data,
+      nextCursor: newCursor,
+    };
   };
 
   const searchLive = async (): Promise<void> => {
-    await Promise.all([searchYouTube(), searchTwitch()]);
+    const [youtube, twitch] = await Promise.all([
+      searchYouTube(),
+      searchTwitch(),
+    ]);
+    mapAndMergeLive([youtube, twitch]);
   };
 
-  const mapAndMergeLive = async () => {
-    await searchLive();
+  const searchSnap = async (): Promise<void> => {
+    const [short, clip] = await Promise.all([
+      searchYouTubeShort(),
+      searchTwitchClip(),
+    ]);
+    mapAndMergeSnap([short, clip]);
+  };
 
-    const youtubeUnified = ytResults.map(mapYouTubeToUnified);
-    const twitchUnified = twitchResults.map(mapTwitchStreamToUnified);
+  const mapAndMergeLive = ([youtube, twitch]: [any, any]) => {
+    const youtubeUnified = youtube.items.map(mapYouTubeToUnified);
+    const twitchUnified = twitch.items.map(mapTwitchStreamToUnified);
 
     const merged = mergeAlternating(youtubeUnified, twitchUnified);
     setUnifiedResults(merged);
+    setLiveSearchDone(true);
+  };
+
+  const mapAndMergeSnap = async ([short, clip]: [any, any]) => {
+    const shortUnified = short.items.map(mapShortToUnified);
+    const clipUnified = clip.items.map(mapTwitchClipToUnified);
+
+    const merged = mergeAlternating(shortUnified, clipUnified);
+    setSnapUnifiedResults(merged);
+    setSnapSearchDone(true);
   };
 
   // 🔥 インクリメンタルにカテゴリ検索
@@ -179,178 +212,32 @@ export default function SearchPage() {
       setCategories([]);
       return;
     }
-
-    const fetchCategories = async () => {
-      const res = await fetch(
-        `https://localhost:7138/api/twitch/categories?query=${debouncedQuery}`
-      );
-      const data = await res.json();
-      setCategories(data.data || []);
-    };
-
     fetchCategories();
   }, [debouncedQuery]);
 
+  const fetchCategories = async () => {
+    const res = await fetch(
+      `https://localhost:7138/api/twitch/categories?query=${debouncedQuery}`
+    );
+    const data = await res.json();
+    setCategories(data.data || []);
+  };
+
   useEffect(() => {
-    if (!selectedCategoryId) return;
+    if (!selectedCategoryId) {
+      return;
+    }
 
-    console.log("選択されたカテゴリID:", selectedCategoryId);
+    setLiveSearchDone(false);
+    setSnapSearchDone(false);
+    console.log("categories are selected  :" + selectedCategoryId);
 
-    // ここでカテゴリIDを使った処理を追加できる
-    // 例: Twitch の配信一覧を取得する
-    // fetch(`/api/twitch/streams?categoryId=${selectedCategoryId}`)
-    //   .then(res => res.json())
-    //   .then(data => console.log(data));
-
-    mapAndMergeLive();
-    // searchYouTube();
-    // //searchYouTubeShort();
-    // searchTwitch();
-    // //searchTwitchClip();
-    // console.log("検索したよ");
-
-    // const youtubeUnified = ytResults.map(mapYouTubeToUnified);
-    // const twitchUnified = twitchResults.map(mapTwitchStreamToUnified);
-
-    // console.log(youtubeUnified.length);
-    // console.log(twitchUnified.length);
-
-    // const merged = mergeAlternating(youtubeUnified, twitchUnified);
-    // setUnifiedResults(merged);
-    // console.log(merged.length);
+    if (currentTab === "live") {
+      searchLive();
+    } else {
+      searchSnap();
+    }
   }, [selectedCategoryId]);
-
-  // return (
-  //   <div style={{ maxWidth: "600px", margin: "0 auto", padding: "20px" }}>
-  //     <h1>Twitch カテゴリ検索</h1>
-
-  //     {/* 入力欄 */}
-  //     <input
-  //       value={query}
-  //       onChange={(e) => setQuery(e.target.value)}
-  //       placeholder="ゲーム名を入力"
-  //       style={{
-  //         width: "100%",
-  //         padding: "10px",
-  //         fontSize: "16px",
-  //         borderRadius: "8px",
-  //         border: "1px solid #ccc",
-  //       }}
-  //     />
-
-  //     {/* 🔽 ドロップダウン表示 */}
-  //     {categories.length > 0 && (
-  //       <div
-  //         style={{
-  //           marginTop: "8px",
-  //           border: "1px solid #ddd",
-  //           borderRadius: "8px",
-  //           background: "white",
-  //           boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-  //         }}
-  //       >
-  //         {categories.map((cat: any) => (
-  //           <div
-  //             key={cat.id}
-  //             style={{
-  //               padding: "10px",
-  //               borderBottom: "1px solid #eee",
-  //               cursor: "pointer",
-  //             }}
-  //             onClick={() => {
-  //               console.log("選択されたカテゴリID:", cat.id);
-  //               console.log("カテゴリ名:", cat.name);
-
-  //               // 入力欄にカテゴリ名を反映
-  //               setQuery(cat.name);
-
-  //               // ドロップダウンを閉じる
-  //               setCategories([]);
-
-  //               // ★ 必要ならカテゴリIDを state に保存
-  //               setSelectedCategoryId(cat.id);
-
-  //               //searchYouTube();
-  //               // searchTwitch();
-  //             }}
-  //           >
-  //             {cat.name}
-  //           </div>
-  //         ))}
-  //       </div>
-  //     )}
-
-  //     {/* <Tabs defaultValue="live"> */}
-  //     {/* <TabsList>
-  //       <TabsTrigger value="live">Live</TabsTrigger>
-  //       <TabsTrigger value="brief">Brief</TabsTrigger>
-  //     </TabsList>
-
-  //     <TabsContent value="live">
-  //       {unifiedResult
-  //         .filter((item) => item.type === "live" || item.type === "Video")
-  //         .map((item) => (
-  //           <UnifiedVideoCard key={item.id} item={item} />
-  //         ))}
-  //     </TabsContent>
-
-  //     <TabsContent value="brief">
-  //       {unifiedResult
-  //         .filter((item) => item.type === "short" || item.type === "clip")
-  //         .map((item) => (
-  //           <UnifiedVideoCard key={item.id} item={item} />
-  //         ))}
-  //     </TabsContent> */}
-  //     {/* </Tabs> */}
-
-  //     {/* Unified */}
-  //     <h2>Results</h2>
-
-  //     {unifiedResult.map((item) => (
-  //       <UnifiedVideoCard key={item.id} item={item} />
-  //     ))}
-
-  //     {/* YouTube */}
-  //     {/* <h2>YouTube</h2>
-  //     {ytResults.map((item: any) => (
-  //       <YouTubeCard key={item.id.videoId} item={item} />
-  //     ))} */}
-
-  //     <button onClick={() => searchYouTube(true)} disabled={!ytCursor}>
-  //       もっと見る
-  //     </button>
-
-  //     {/* Twitch */}
-  //     {/* <h2 style={{ marginTop: "40px" }}>Twitch</h2>
-  //     {twitchResults.map((item: any) => (
-  //       <TwitchCard key={item.id} item={item} />
-  //     ))} */}
-
-  //     <button onClick={() => searchTwitch(true)} disabled={!cursor}>
-  //       もっと見る
-  //     </button>
-
-  //     {/* YouTubeShort */}
-  //     <h2>YouTubeShort</h2>
-  //     {ytsResults.map((item: any) => (
-  //       <YouTubeCard key={item.id.videoId} item={item} />
-  //     ))}
-
-  //     <button onClick={() => searchYouTubeShort(true)} disabled={!ytsCursor}>
-  //       もっと見る
-  //     </button>
-
-  //     {/* TwitchClip */}
-  //     <h2 style={{ marginTop: "40px" }}>TwitchClip</h2>
-  //     {twitchClipResults.map((item: any) => (
-  //       <TwitchClipCard key={item.id} item={item} />
-  //     ))}
-
-  //     <button onClick={() => searchTwitchClip(true)} disabled={!clipCursor}>
-  //       もっと見る
-  //     </button>
-  //   </div>
-  // );
 
   return (
     <div style={{ maxWidth: "600px", margin: "0 auto", padding: "20px" }}>
@@ -359,7 +246,10 @@ export default function SearchPage() {
       {/* 入力欄 */}
       <input
         value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        onChange={(e) => {
+          setSkipDebounce(false);
+          setQuery(e.target.value);
+        }}
         placeholder="ゲーム名を入力"
         style={{
           width: "100%",
@@ -390,9 +280,10 @@ export default function SearchPage() {
                 cursor: "pointer",
               }}
               onClick={() => {
+                setSkipDebounce(true);
                 setQuery(cat.name);
-                setCategories([]);
                 setSelectedCategoryId(cat.id);
+                setCategories([]);
               }}
             >
               {cat.name}
@@ -407,20 +298,29 @@ export default function SearchPage() {
       {/* ▼▼▼ ここから Tabs ▼▼▼ */}
       <Tabs.Root
         defaultValue="live"
-        // onValueChange={(details) => {
-        //   if (details.value === "live") {
-        //     searchYouTubeLive();
-        //     searchTwitchLive();
-        //   }
-        //   if (details.value === "brief") {
-        //     searchYouTubeShorts();
-        //     searchTwitchClips();
-        //   }
-        // }}
+        onValueChange={(details) => {
+          setCurrentTab(details.value);
+
+          if (!selectedCategoryId) {
+            return;
+          }
+
+          if (details.value === "live") {
+            if (isLiveSearchDone) {
+              return;
+            }
+            searchLive();
+          } else {
+            if (isSnapSearchDone) {
+              return;
+            }
+            searchSnap();
+          }
+        }}
       >
         <TabsList>
           <TabsTrigger value="live">Live</TabsTrigger>
-          <TabsTrigger value="brief">Brief</TabsTrigger>
+          <TabsTrigger value="snap">Snap</TabsTrigger>
         </TabsList>
 
         {/* Live */}
@@ -435,9 +335,9 @@ export default function SearchPage() {
             ))}
         </TabsContent>
 
-        {/* Brief */}
-        <TabsContent value="brief">
-          {unifiedResult
+        {/* Snap */}
+        <TabsContent value="snap">
+          {snapUnifiedResult
             .filter((item) => item.type === "short" || item.type === "clip")
             .map((item) => (
               <UnifiedVideoCard key={item.id} item={item} />

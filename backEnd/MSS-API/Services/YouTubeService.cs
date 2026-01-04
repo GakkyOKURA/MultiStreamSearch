@@ -11,6 +11,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Xml;
 using static System.Net.WebRequestMethods;
+using MyApi.Models.YouTubeShortSearchHelper;
 
 namespace MyApi.Services;
 
@@ -118,9 +119,8 @@ public class YouTubeService : IYouTubeService
             }
 
             json = await _httpClient.GetStringAsync(url);
+            _cache[cacheKey] = json;
         }
-
-        _cache[cacheKey] = json;
 
         var result = JsonSerializer.Deserialize<YouTubeSearchResponse>(json);
  
@@ -174,175 +174,6 @@ public class YouTubeService : IYouTubeService
         }
 
         return true; // リダイレクトなし → Shorts
-    }
-
-    //private async Task<List<VideoDetail>> GetVideoDetailsAsync(List<string> videoIds)
-    //{
-    //    string? json = null;
-
-    //    var cacheKey = string.Join("&", videoIds);
-    //    if (_cache.TryGetValue(cacheKey, out var cached))
-    //    {
-    //        json = cached; // キャッシュから返す
-    //    }
-
-    //    if (json is null)
-    //    {
-
-    //        if (videoIds.Count == 0)
-    //        {
-    //            return new List<VideoDetail>();
-    //        }
-
-    //        var ids = string.Join(",", videoIds);
-
-    //        var url = $"https://www.googleapis.com/youtube/v3/videos" +
-    //                  $"?part=snippet,contentDetails" +
-    //                  $"&id={ids}" +
-    //                  $"&key={_settings.ApiKey}";
-
-    //        json = await _httpClient.GetStringAsync(url);
-    //    }
-    //    _cache[cacheKey] = json;
-
-    //    var result = JsonSerializer.Deserialize<DetailSearchResponse>(json);/*, new JsonSerializerOptions*/
-    //    //{
-    //    //    PropertyNameCaseInsensitive = true
-    //    //});
-    //    if(result is null)
-    //    {
-    //        return new List<VideoDetail>();
-    //    }
-
-    //    return result.Items;
-    //}
-
-    //private static bool IsShort(VideoDetail video)
-    //{
-    //    if (!TryParseDuration(video.ContentDetails.Duration, out var duration))
-    //    {
-    //        return false;
-    //    }
-
-    //    if (duration.TotalSeconds > YouTubeShortSeconds)
-    //    {
-    //        return false;
-    //    }
-
-    //    var thumb = video.Snippet.Thumbnails.High
-    //                ?? video.Snippet.Thumbnails.Medium
-    //                ?? video.Snippet.Thumbnails.Default;
-
-    //    if (thumb is null)
-    //    {
-    //        return false;
-    //    }
-
-    //    if (thumb.Height <= thumb.Width)
-    //    {
-    //        return false;
-    //    }
-
-    //    return true;
-    //}
-
-    //private static bool TryParseDuration(string isoDuration, out TimeSpan result)
-    //{
-    //    try
-    //    {
-    //        result = XmlConvert.ToTimeSpan(isoDuration);
-    //        return true;
-    //    }
-    //    catch
-    //    {
-    //        result = TimeSpan.Zero;
-    //        return false;
-    //    }
-    //}
-
-    //private YouTubeSearchResponse ConvertToSearchResponse(List<VideoDetail> shortInfos)
-    //{
-    //    var ytsrItems = new List<SearchItem>();
-    //    foreach (var shortInfo in shortInfos)
-    //    {
-    //        var searchItem = new SearchItem
-    //        {
-    //            Id = new SearchId { VideoId = shortInfo.Id },
-    //            Snippet = shortInfo.Snippet
-    //        };
-    //        ytsrItems.Add(searchItem);
-    //    }
-
-    //    var response = new YouTubeSearchResponse
-    //    {
-    //        Items = ytsrItems
-    //    };
-
-    //    return response;
-    //}
-
-    //public async Task<List<YouTubeVideoDetailDto>> SearchVideosWithDetailsAsync(string keyword)
-    //{
-    //    // 1. 検索 API
-    //    var searchUrl =
-    //        "https://www.googleapis.com/youtube/v3/search" +
-    //        $"?part=snippet&type=video&maxResults=10&q={Uri.EscapeDataString(keyword)}&key={_settings.ApiKey}";
-
-    //    var searchResponse = await _httpClient.GetStringAsync(searchUrl);
-    //    var searchJson = JObject.Parse(searchResponse);
-
-    //    var videoIds = searchJson["items"]?
-    //        .Select(i => (string?)i["id"]?["videoId"])
-    //        .ToList();
-    //    if(videoIds is null)
-    //    {
-    //        return new List<YouTubeVideoDetailDto>();
-    //    }
-
-    //    if (!videoIds.Any())
-    //    {
-    //        return new List<YouTubeVideoDetailDto>();
-    //    }
-
-    //    // 2. 詳細 API
-    //    var detailsUrl =
-    //        "https://www.googleapis.com/youtube/v3/videos" +
-    //        $"?part=snippet,statistics,contentDetails&id={string.Join(",", videoIds)}&key={_settings.ApiKey}";
-
-    //    var detailsResponse = await _httpClient.GetStringAsync(detailsUrl);
-    //    var detailsJson = JObject.Parse(detailsResponse);
-
-    //    // 3. DTO に整形
-    //    var result = new List<YouTubeVideoDetailDto>();
-    //    var items = detailsJson["items"];
-    //    if(items is null)
-    //    {
-    //        return result;
-    //    }
-
-    //    foreach (var item in items)
-    //    {
-    //        result.Add(new YouTubeVideoDetailDto
-    //        {
-    //            VideoId = (string?)item["id"]?? "",
-    //            Title = (string?)item["snippet"]?["title"]?? "",
-    //            ThumbnailUrl = (string?)item["snippet"]?["thumbnails"]?["high"]?["url"]?? "",
-    //            ChannelTitle = (string?)item["snippet"]?["channelTitle"]?? "",
-    //            PublishedAt = (string?)item["snippet"]?["publishedAt"]?? "",
-    //            ViewCount = (long?)item["statistics"]?["viewCount"]?? 0,
-    //            LikeCount = (long?)item["statistics"]?["likeCount"]?? 0,
-    //            CommentCount = (long?)item["statistics"]?["commentCount"]?? 0,
-    //            Duration = (string?)item["contentDetails"]?["duration"]?? ""
-    //        });
-    //    }
-
-    //    return result;
-    //}
+    }  
 }
-
-//public class LowerCaseNamingPolicy : JsonNamingPolicy
-//{
-//    public override string ConvertName(string name)
-//        => name.ToLower();
-//}
 

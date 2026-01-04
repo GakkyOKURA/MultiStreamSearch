@@ -30,7 +30,7 @@ public static class TwitchEndpoints
         // clip 検索
         app.MapGet("/api/twitch/clips", async (string categoryId, string period, string? cursor, ITwitchService twitch) =>
         {
-            var result = await twitch.GetClipsByCategoryAsync(categoryId, period, cursor);
+            var result = await twitch.GetClipsAsync(categoryId, period, cursor);
             return Results.Content(result, "application/json");
         });
     }
