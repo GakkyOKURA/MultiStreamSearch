@@ -1,11 +1,12 @@
 ﻿using MyApi.DTOs;
+using MyApi.Models;
 
 namespace MyApi.Interfaces;
 
 public interface IYouTubeService
 {
-    Task<string> SearchYouTubeVideosAsync(string keyword, string? pageToken);
-    Task<string> GetShortsAsync(string keyword, string period, string? pageToken);
-    //Task<List<YouTubeVideoDetailDto>> SearchVideosWithDetailsAsync(string keyword);
-
+    Task<YouTubeSearchResult> SearchYouTubeLiveStreamsAsync(string keyword);
+    Task<YouTubeSearchResult> SearchYouTubeShortsAsync(string keyword);
+    Task<YouTubeSearchResult> FetchYouTubeLiveStreamsAsync(string keyword);
+    Task<YouTubeSearchResult> FetchYouTubeShortsAsync(string keyword);
 }

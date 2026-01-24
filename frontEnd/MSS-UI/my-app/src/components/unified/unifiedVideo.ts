@@ -4,10 +4,8 @@ export interface UnifiedVideo {
   thumbnailUrl: string;       // サムネイルURL
   url: string;                // 実際に開くURL
   source: "youtube" | "twitch"; // どっちのサービスか
-  type: "twitchLive" | "youtubeLive" | "short" | "clip"; // 種類
+  type: "twitchStream" | "youtubeLiveStream" | "youtubeShort" | "twitchClip"; // 種類
   channelName: string;        // 配信者 or チャンネル名
-  viewerCount?: number;       // ライブの場合のみ
-  publishedAt?: string;       // 投稿日
 }
 
 export function mergeAlternating<T>(a: T[], b: T[]): T[] {

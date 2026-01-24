@@ -1,27 +1,26 @@
+import type { YouTubeSearchItemDto } from "../youtube/YouTubeDto";
 import type { UnifiedVideo } from "./unifiedVideo";
 
-export function mapYouTubeToUnified(item: any): UnifiedVideo {
+export function mapYouTubeToUnified(item: YouTubeSearchItemDto): UnifiedVideo {
   return {
     id: item.id.videoId,
     title: item.snippet.title,
     thumbnailUrl: item.snippet.thumbnails.medium.url,
     url: `https://www.youtube.com/watch?v=${item.id.videoId}`,
     source: "youtube",
-    type: "youtubeLive",
+    type: "youtubeLiveStream",
     channelName: item.snippet.channelTitle,
-    publishedAt: item.snippet.publishedAt
   };
 }
 
-export function mapShortToUnified(item: any): UnifiedVideo {
+export function mapShortToUnified(item: YouTubeSearchItemDto): UnifiedVideo {
   return {
     id: item.id.videoId,
     title: item.snippet.title,
     thumbnailUrl: item.snippet.thumbnails.medium.url,
     url: `https://www.youtube.com/watch?v=${item.id.videoId}`,
     source: "youtube",
-    type: "short",
+    type: "youtubeShort",
     channelName: item.snippet.channelTitle,
-    publishedAt: item.snippet.publishedAt
   };
 }

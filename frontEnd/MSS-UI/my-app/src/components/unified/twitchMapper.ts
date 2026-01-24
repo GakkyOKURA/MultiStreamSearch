@@ -1,27 +1,26 @@
+import type { TwitchClipSearchDto, TwitchStreamSearchDto } from "../twitch/TwitchDto";
 import type { UnifiedVideo } from "./unifiedVideo";
 
-export function mapTwitchStreamToUnified(item: any): UnifiedVideo {
+export function mapTwitchStreamToUnified(item: TwitchStreamSearchDto): UnifiedVideo {
   return {
-    id: item.user_login,
+    id: item.userLogin,
     title: item.title,
-    thumbnailUrl: item.thumbnail_url.replace("{width}", "320").replace("{height}", "180"),
-    url: `https://www.twitch.tv/${item.user_login}`,
+    thumbnailUrl: item.thumbnailUrl.replace("{width}", "320").replace("{height}", "180"),
+    url: `https://www.twitch.tv/${item.userLogin}`,
     source: "twitch",
-    type: "twitchLive",
-    channelName: item.user_name,
-    viewerCount: item.viewer_count
+    type: "twitchStream",
+    channelName: item.userName,
   };
 }
 
-export function mapTwitchClipToUnified(item: any): UnifiedVideo {
+export function mapTwitchClipToUnified(item: TwitchClipSearchDto): UnifiedVideo {
   return {
     id: item.id,
     title: item.title,
-    thumbnailUrl: item.thumbnail_url,
+    thumbnailUrl: item.thumbnailUrl,
     url: item.url,
     source: "twitch",
-    type: "clip",
-    channelName: item.broadcaster_name,
-    publishedAt: item.created_at
+    type: "twitchClip",
+    channelName: item.broadcasterName,
   };
 }

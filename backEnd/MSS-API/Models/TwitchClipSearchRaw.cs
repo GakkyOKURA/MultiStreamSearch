@@ -1,17 +1,23 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace MyApi.Models.TwitchClipSearchHelper;
+namespace MyApi.Models;
 
 public class TwitchClipSearchResponse
 {
     [JsonPropertyName("data")]
-    public List<SearchItem> Data { get; set; } = new();
+    public List<TwitchClipSearchRaw> Data { get; set; } = new();
 
-    [JsonPropertyName("pagenation")]
-    public string Pagination { get; set; } = "";
+    [JsonPropertyName("pagination")]
+    public TwitchClipPaginationRaw Pagination { get; set; } = new();
 }
 
-public class SearchItem
+public class TwitchClipPaginationRaw
+{
+    [JsonPropertyName("cursor")]
+    public string? Cursor { get; set; }
+}
+
+public class TwitchClipSearchRaw
 {
     [JsonPropertyName("id")]
     public string Id { get; set; } = "";
@@ -49,7 +55,8 @@ public class SearchItem
     [JsonPropertyName("view_count")]
     public int ViewCount { get; set; }
 
-    //public DateTime CreatedAt { get; set; }
+    [JsonPropertyName("created_at")]
+    public DateTime CreatedAt { get; set; }
 
     [JsonPropertyName("thumbnail_url")]
     public string ThumbnailUrl { get; set; } = "";

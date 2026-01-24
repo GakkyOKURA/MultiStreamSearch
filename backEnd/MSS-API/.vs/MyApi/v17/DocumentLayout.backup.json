@@ -3,59 +3,101 @@
   "WorkspaceRootPath": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\models\\twitchstreamsearchraw.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:models\\twitchstreamsearchraw.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\gakky\\AppData\\Local\\SourceServer\\0e53fed52daed85128b16a75184d41c2e7c6459ff3efd844144a257012468359\\src\\StackExchange.Redis\\ConnectionMultiplexer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\models\\youtubesearchdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:models\\youtubesearchdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\services\\youtubeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:services\\youtubeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\services\\twitchservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:services\\twitchservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\models\\youtubeshortsearchhelpers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:models\\youtubeshortsearchhelpers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\interfaces\\itwitchservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:interfaces\\itwitchservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\endpoints\\twitchendpoints.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:endpoints\\twitchendpoints.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\endpoints\\youtubeendpoints.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:endpoints\\youtubeendpoints.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\models\\twitchclipsearchhelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:models\\twitchclipsearchhelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\interfaces\\iyoutubeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:interfaces\\iyoutubeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\models\\searchperiod.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:models\\searchperiod.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\gakky\\AppData\\Local\\SourceServer\\5ba3b93fc6d68a3f275e7274a03b9b42b9a70eb0c238fcba821265e5d5d5d6e1\\src\\libraries\\System.Private.CoreLib\\src\\System\\Threading\\ExecutionContext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
-      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\endpoints\\gameinfoendpoints.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:endpoints\\gameinfoendpoints.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\dtos\\youtubesearchresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:dtos\\youtubesearchresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\services\\cacheupdater\\youtubeshortscacheupdater.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:services\\cacheupdater\\youtubeshortscacheupdater.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\myapi.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
-      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:myapi.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\services\\twitchservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:services\\twitchservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\models\\twitchclipsearchraw.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:models\\twitchclipsearchraw.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\services\\cacheupdater\\twitchclipscacheupdater.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:services\\cacheupdater\\twitchclipscacheupdater.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\models\\searchperiod.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:models\\searchperiod.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\interfaces\\iyoutubeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:interfaces\\iyoutubeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\interfaces\\itwitchservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:interfaces\\itwitchservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\services\\cacheupdater\\youtubelivestreamscacheupdater.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:services\\cacheupdater\\youtubelivestreamscacheupdater.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\services\\cacheupdater\\twitchstreamscacheupdater.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:services\\cacheupdater\\twitchstreamscacheupdater.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\models\\cachekeyhelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:models\\cachekeyhelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\endpoints\\twitchendpoints.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:endpoints\\twitchendpoints.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\gakky\\AppData\\Local\\SourceServer\\5ba3b93fc6d68a3f275e7274a03b9b42b9a70eb0c238fcba821265e5d5d5d6e1\\src\\libraries\\System.Private.CoreLib\\src\\System\\Threading\\ExecutionContext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\gakky\\AppData\\Local\\SourceServer\\4bae0f8d075725569a85873d2e162cb272878d203d9cc8f98e8d07ee8e271284\\src\\libraries\\System.Private.CoreLib\\src\\System\\Runtime\\CompilerServices\\TaskAwaiter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\endpoints\\youtubeendpoints.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:endpoints\\youtubeendpoints.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\models\\searchwordhelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:models\\searchwordhelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\services\\rediscacheservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:services\\rediscacheservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\dtos\\gameinfodto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:dtos\\gameinfodto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\models\\gameinfoprovider.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:models\\gameinfoprovider.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\interfaces\\igameinfoprovider.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:interfaces\\igameinfoprovider.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\config\\youtubeapisettings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -70,6 +112,14 @@
       "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:controllers\\youtubecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|c:\\users\\gakky\\desktop\\mss\\multistreamsearch\\backend\\mss-api\\myapi.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{3F58CBAC-68AB-4F63-EB4F-57CA16CF5716}|MyApi.csproj|solutionrelative:myapi.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\gakky\\AppData\\Local\\Temp\\.vsdbgsrc\\a09cfc4c24c3019ec95512fcae2deecb033ba97c7ac6f7665c4eff44f1bd85a3\\Task.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -80,216 +130,375 @@
       "DocumentGroups": [
         {
           "DockedHeight": 200,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "TwitchService.cs",
-              "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Services\\TwitchService.cs",
-              "RelativeDocumentMoniker": "Services\\TwitchService.cs",
-              "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Services\\TwitchService.cs",
-              "RelativeToolTip": "Services\\TwitchService.cs",
-              "ViewState": "AgIAAM4AAAAAAAAAAAAAwOAAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 9,
+              "Title": "TwitchClipsCacheUpdater.cs",
+              "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Services\\CacheUpdater\\TwitchClipsCacheUpdater.cs",
+              "RelativeDocumentMoniker": "Services\\CacheUpdater\\TwitchClipsCacheUpdater.cs",
+              "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Services\\CacheUpdater\\TwitchClipsCacheUpdater.cs",
+              "RelativeToolTip": "Services\\CacheUpdater\\TwitchClipsCacheUpdater.cs",
+              "ViewState": "AgIAABUAAAAAAAAAAAAIwDAAAABCAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-22T17:23:39.307Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "YouTubeShortSearchHelpers.cs",
-              "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Models\\YouTubeShortSearchHelpers.cs",
-              "RelativeDocumentMoniker": "Models\\YouTubeShortSearchHelpers.cs",
-              "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Models\\YouTubeShortSearchHelpers.cs",
-              "RelativeToolTip": "Models\\YouTubeShortSearchHelpers.cs",
-              "ViewState": "AgIAACwAAAAAAAAAAAAcwDMAAAAdAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-28T15:16:44.539Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "ITwitchService.cs",
-              "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Interfaces\\ITwitchService.cs",
-              "RelativeDocumentMoniker": "Interfaces\\ITwitchService.cs",
-              "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Interfaces\\ITwitchService.cs",
-              "RelativeToolTip": "Interfaces\\ITwitchService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAUAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-22T17:11:54.069Z"
+              "WhenOpened": "2026-01-09T23:31:40.611Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 4,
-              "Title": "TwitchEndpoints.cs",
-              "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Endpoints\\TwitchEndpoints.cs",
-              "RelativeDocumentMoniker": "Endpoints\\TwitchEndpoints.cs",
-              "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Endpoints\\TwitchEndpoints.cs",
-              "RelativeToolTip": "Endpoints\\TwitchEndpoints.cs",
-              "ViewState": "AgIAAA0AAAAAAAAAAAAAwCEAAAA/AAAAAAAAAA==",
+              "Title": "GameInfoEndpoints.cs",
+              "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Endpoints\\GameInfoEndpoints.cs",
+              "RelativeDocumentMoniker": "Endpoints\\GameInfoEndpoints.cs",
+              "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Endpoints\\GameInfoEndpoints.cs",
+              "RelativeToolTip": "Endpoints\\GameInfoEndpoints.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-22T17:16:26.063Z"
+              "WhenOpened": "2026-01-10T21:59:41.298Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "YouTubeEndpoints.cs",
-              "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Endpoints\\YouTubeEndpoints.cs",
-              "RelativeDocumentMoniker": "Endpoints\\YouTubeEndpoints.cs",
-              "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Endpoints\\YouTubeEndpoints.cs",
-              "RelativeToolTip": "Endpoints\\YouTubeEndpoints.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAMAAAAAAAAAA==",
+              "DocumentIndex": 2,
+              "Title": "YouTubeSearchDto.cs",
+              "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Models\\YouTubeSearchDto.cs",
+              "RelativeDocumentMoniker": "Models\\YouTubeSearchDto.cs",
+              "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Models\\YouTubeSearchDto.cs",
+              "RelativeToolTip": "Models\\YouTubeSearchDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAD4AAAAyAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-22T17:16:12.563Z"
+              "WhenOpened": "2026-01-11T11:07:25.103Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 3,
               "Title": "YouTubeService.cs",
               "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Services\\YouTubeService.cs",
               "RelativeDocumentMoniker": "Services\\YouTubeService.cs",
               "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Services\\YouTubeService.cs",
               "RelativeToolTip": "Services\\YouTubeService.cs",
-              "ViewState": "AgIAAHsAAAAAAAAAAAAowKwAAAANAAAAAAAAAA==",
+              "ViewState": "AgIAAFkAAAAAAAAAAAAAAHEAAAAlAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-21T01:08:34.499Z",
+              "WhenOpened": "2026-01-10T10:25:29.734Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "TwitchClipSearchHelper.cs",
-              "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Models\\TwitchClipSearchHelper.cs",
-              "RelativeDocumentMoniker": "Models\\TwitchClipSearchHelper.cs",
-              "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Models\\TwitchClipSearchHelper.cs",
-              "RelativeToolTip": "Models\\TwitchClipSearchHelper.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAADEAAAAmAAAAAAAAAA==",
+              "DocumentIndex": 0,
+              "Title": "TwitchStreamSearchRaw.cs",
+              "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Models\\TwitchStreamSearchRaw.cs",
+              "RelativeDocumentMoniker": "Models\\TwitchStreamSearchRaw.cs",
+              "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Models\\TwitchStreamSearchRaw.cs",
+              "RelativeToolTip": "Models\\TwitchStreamSearchRaw.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAbAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-03T23:37:52.967Z"
+              "WhenOpened": "2026-01-11T00:09:21.748Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "IYouTubeService.cs",
-              "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Interfaces\\IYouTubeService.cs",
-              "RelativeDocumentMoniker": "Interfaces\\IYouTubeService.cs",
-              "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Interfaces\\IYouTubeService.cs",
-              "RelativeToolTip": "Interfaces\\IYouTubeService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAcAAAARAAAAAAAAAA==",
+              "DocumentIndex": 1,
+              "Title": "ConnectionMultiplexer.cs",
+              "DocumentMoniker": "C:\\Users\\gakky\\AppData\\Local\\SourceServer\\0e53fed52daed85128b16a75184d41c2e7c6459ff3efd844144a257012468359\\src\\StackExchange.Redis\\ConnectionMultiplexer.cs",
+              "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\AppData\\Local\\SourceServer\\0e53fed52daed85128b16a75184d41c2e7c6459ff3efd844144a257012468359\\src\\StackExchange.Redis\\ConnectionMultiplexer.cs",
+              "ToolTip": "C:\\Users\\gakky\\AppData\\Local\\SourceServer\\0e53fed52daed85128b16a75184d41c2e7c6459ff3efd844144a257012468359\\src\\StackExchange.Redis\\ConnectionMultiplexer.cs",
+              "RelativeToolTip": "..\\..\\..\\..\\..\\AppData\\Local\\SourceServer\\0e53fed52daed85128b16a75184d41c2e7c6459ff3efd844144a257012468359\\src\\StackExchange.Redis\\ConnectionMultiplexer.cs",
+              "ViewState": "AgIAALwCAAAAAAAAAAAEwNICAAAiAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-21T01:07:46.993Z"
+              "WhenOpened": "2026-01-19T13:42:58.887Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "SearchPeriod.cs",
-              "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Models\\SearchPeriod.cs",
-              "RelativeDocumentMoniker": "Models\\SearchPeriod.cs",
-              "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Models\\SearchPeriod.cs",
-              "RelativeToolTip": "Models\\SearchPeriod.cs",
-              "ViewState": "AgIAAAEAAAAAAAAAAAAAwBkAAAAnAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-28T12:36:38.163Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 5,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
               "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Program.cs",
               "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACAAAAASAAAAAAAAAA==",
+              "ViewState": "AgIAABgAAAAAAAAAAAAAADQAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-12-20T16:01:31.19Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "appsettings.json",
-              "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\appsettings.json",
-              "RelativeDocumentMoniker": "appsettings.json",
-              "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\appsettings.json",
-              "RelativeToolTip": "appsettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAtAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-12-21T01:04:43.051Z"
+              "DocumentIndex": 6,
+              "Title": "YouTubeShortsCacheUpdater.cs",
+              "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Services\\CacheUpdater\\YouTubeShortsCacheUpdater.cs",
+              "RelativeDocumentMoniker": "Services\\CacheUpdater\\YouTubeShortsCacheUpdater.cs",
+              "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Services\\CacheUpdater\\YouTubeShortsCacheUpdater.cs",
+              "RelativeToolTip": "Services\\CacheUpdater\\YouTubeShortsCacheUpdater.cs",
+              "ViewState": "AgIAAB0AAAAAAAAAAAAqwC4AAABDAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-05T11:03:43.93Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 8,
+              "Title": "TwitchClipSearchRaw.cs",
+              "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Models\\TwitchClipSearchRaw.cs",
+              "RelativeDocumentMoniker": "Models\\TwitchClipSearchRaw.cs",
+              "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Models\\TwitchClipSearchRaw.cs",
+              "RelativeToolTip": "Models\\TwitchClipSearchRaw.cs",
+              "ViewState": "AgIAAAIAAAAAAAAAAAAAABYAAAAoAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-03T23:37:52.967Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "SearchPeriod.cs",
+              "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Models\\SearchPeriod.cs",
+              "RelativeDocumentMoniker": "Models\\SearchPeriod.cs",
+              "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Models\\SearchPeriod.cs",
+              "RelativeToolTip": "Models\\SearchPeriod.cs",
+              "ViewState": "AgIAAAoAAAAAAAAAAAAwwB4AAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-28T12:36:38.163Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "TwitchService.cs",
+              "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Services\\TwitchService.cs",
+              "RelativeDocumentMoniker": "Services\\TwitchService.cs",
+              "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Services\\TwitchService.cs",
+              "RelativeToolTip": "Services\\TwitchService.cs",
+              "ViewState": "AgIAALAAAAAAAAAAAAAcwMYAAAAaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-22T17:23:39.307Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "IYouTubeService.cs",
+              "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Interfaces\\IYouTubeService.cs",
+              "RelativeDocumentMoniker": "Interfaces\\IYouTubeService.cs",
+              "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Interfaces\\IYouTubeService.cs",
+              "RelativeToolTip": "Interfaces\\IYouTubeService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAoAAAAeAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-21T01:07:46.993Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "ITwitchService.cs",
+              "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Interfaces\\ITwitchService.cs",
+              "RelativeDocumentMoniker": "Interfaces\\ITwitchService.cs",
+              "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Interfaces\\ITwitchService.cs",
+              "RelativeToolTip": "Interfaces\\ITwitchService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAkAAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-22T17:11:54.069Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "YouTubeLiveStreamsCacheUpdater.cs",
+              "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Services\\CacheUpdater\\YouTubeLiveStreamsCacheUpdater.cs",
+              "RelativeDocumentMoniker": "Services\\CacheUpdater\\YouTubeLiveStreamsCacheUpdater.cs",
+              "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Services\\CacheUpdater\\YouTubeLiveStreamsCacheUpdater.cs",
+              "RelativeToolTip": "Services\\CacheUpdater\\YouTubeLiveStreamsCacheUpdater.cs",
+              "ViewState": "AgIAACgAAAAAAAAAAAAAAFAAAAAeAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-10T00:22:15.368Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "TwitchStreamsCacheUpdater.cs",
+              "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Services\\CacheUpdater\\TwitchStreamsCacheUpdater.cs",
+              "RelativeDocumentMoniker": "Services\\CacheUpdater\\TwitchStreamsCacheUpdater.cs",
+              "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Services\\CacheUpdater\\TwitchStreamsCacheUpdater.cs",
+              "RelativeToolTip": "Services\\CacheUpdater\\TwitchStreamsCacheUpdater.cs",
+              "ViewState": "AgIAACcAAAAAAAAAAAAAABUAAAATAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-08T12:12:03.531Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "CacheKeyHelper.cs",
+              "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Models\\CacheKeyHelper.cs",
+              "RelativeDocumentMoniker": "Models\\CacheKeyHelper.cs",
+              "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Models\\CacheKeyHelper.cs",
+              "RelativeToolTip": "Models\\CacheKeyHelper.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAwAAAAbAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-09T23:40:46.415Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "TwitchEndpoints.cs",
+              "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Endpoints\\TwitchEndpoints.cs",
+              "RelativeDocumentMoniker": "Endpoints\\TwitchEndpoints.cs",
+              "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Endpoints\\TwitchEndpoints.cs",
+              "RelativeToolTip": "Endpoints\\TwitchEndpoints.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAACIAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-22T17:16:26.063Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
               "Title": "ExecutionContext.cs",
               "DocumentMoniker": "C:\\Users\\gakky\\AppData\\Local\\SourceServer\\5ba3b93fc6d68a3f275e7274a03b9b42b9a70eb0c238fcba821265e5d5d5d6e1\\src\\libraries\\System.Private.CoreLib\\src\\System\\Threading\\ExecutionContext.cs",
               "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\AppData\\Local\\SourceServer\\5ba3b93fc6d68a3f275e7274a03b9b42b9a70eb0c238fcba821265e5d5d5d6e1\\src\\libraries\\System.Private.CoreLib\\src\\System\\Threading\\ExecutionContext.cs",
               "ToolTip": "C:\\Users\\gakky\\AppData\\Local\\SourceServer\\5ba3b93fc6d68a3f275e7274a03b9b42b9a70eb0c238fcba821265e5d5d5d6e1\\src\\libraries\\System.Private.CoreLib\\src\\System\\Threading\\ExecutionContext.cs",
               "RelativeToolTip": "..\\..\\..\\..\\..\\AppData\\Local\\SourceServer\\5ba3b93fc6d68a3f275e7274a03b9b42b9a70eb0c238fcba821265e5d5d5d6e1\\src\\libraries\\System.Private.CoreLib\\src\\System\\Threading\\ExecutionContext.cs",
-              "ViewState": "AgIAALUAAAAAAAAAAAAIwMoAAAAMAAAAAAAAAA==",
+              "ViewState": "AgIAAJ8AAAAAAAAAAAAIwLIAAAAQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-01-03T03:13:19.477Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
-              "Title": "YouTubeSearchResponseDto.cs",
-              "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\DTOs\\YouTubeSearchResponseDto.cs",
-              "RelativeDocumentMoniker": "DTOs\\YouTubeSearchResponseDto.cs",
-              "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\DTOs\\YouTubeSearchResponseDto.cs",
-              "RelativeToolTip": "DTOs\\YouTubeSearchResponseDto.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAABAAAAAAAAAA==",
+              "DocumentIndex": 18,
+              "Title": "TaskAwaiter.cs",
+              "DocumentMoniker": "C:\\Users\\gakky\\AppData\\Local\\SourceServer\\4bae0f8d075725569a85873d2e162cb272878d203d9cc8f98e8d07ee8e271284\\src\\libraries\\System.Private.CoreLib\\src\\System\\Runtime\\CompilerServices\\TaskAwaiter.cs",
+              "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\AppData\\Local\\SourceServer\\4bae0f8d075725569a85873d2e162cb272878d203d9cc8f98e8d07ee8e271284\\src\\libraries\\System.Private.CoreLib\\src\\System\\Runtime\\CompilerServices\\TaskAwaiter.cs",
+              "ToolTip": "C:\\Users\\gakky\\AppData\\Local\\SourceServer\\4bae0f8d075725569a85873d2e162cb272878d203d9cc8f98e8d07ee8e271284\\src\\libraries\\System.Private.CoreLib\\src\\System\\Runtime\\CompilerServices\\TaskAwaiter.cs",
+              "RelativeToolTip": "..\\..\\..\\..\\..\\AppData\\Local\\SourceServer\\4bae0f8d075725569a85873d2e162cb272878d203d9cc8f98e8d07ee8e271284\\src\\libraries\\System.Private.CoreLib\\src\\System\\Runtime\\CompilerServices\\TaskAwaiter.cs",
+              "ViewState": "AgIAAF4AAAAAAAAAAAAMwHEAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-12T06:41:01.037Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "YouTubeEndpoints.cs",
+              "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Endpoints\\YouTubeEndpoints.cs",
+              "RelativeDocumentMoniker": "Endpoints\\YouTubeEndpoints.cs",
+              "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Endpoints\\YouTubeEndpoints.cs",
+              "RelativeToolTip": "Endpoints\\YouTubeEndpoints.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAA+AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-22T17:16:12.563Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "SearchWordHelper.cs",
+              "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Models\\SearchWordHelper.cs",
+              "RelativeDocumentMoniker": "Models\\SearchWordHelper.cs",
+              "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Models\\SearchWordHelper.cs",
+              "RelativeToolTip": "Models\\SearchWordHelper.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAmAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-10T00:06:03.781Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "RedisCacheService.cs",
+              "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Services\\RedisCacheService.cs",
+              "RelativeDocumentMoniker": "Services\\RedisCacheService.cs",
+              "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Services\\RedisCacheService.cs",
+              "RelativeToolTip": "Services\\RedisCacheService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-07T19:31:46.04Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "GameInfoDto.cs",
+              "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\DTOs\\GameInfoDto.cs",
+              "RelativeDocumentMoniker": "DTOs\\GameInfoDto.cs",
+              "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\DTOs\\GameInfoDto.cs",
+              "RelativeToolTip": "DTOs\\GameInfoDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAYAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-12-21T01:10:25.752Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 23,
+              "Title": "GameInfoProvider.cs",
+              "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Models\\GameInfoProvider.cs",
+              "RelativeDocumentMoniker": "Models\\GameInfoProvider.cs",
+              "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Models\\GameInfoProvider.cs",
+              "RelativeToolTip": "Models\\GameInfoProvider.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-10T11:55:46.425Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "IGameInfoProvider.cs",
+              "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Interfaces\\IGameInfoProvider.cs",
+              "RelativeDocumentMoniker": "Interfaces\\IGameInfoProvider.cs",
+              "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Interfaces\\IGameInfoProvider.cs",
+              "RelativeToolTip": "Interfaces\\IGameInfoProvider.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAUAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-10T21:58:05.685Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
               "Title": "YouTubeApiSettings.cs",
               "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Config\\YouTubeApiSettings.cs",
               "RelativeDocumentMoniker": "Config\\YouTubeApiSettings.cs",
               "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Config\\YouTubeApiSettings.cs",
               "RelativeToolTip": "Config\\YouTubeApiSettings.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAYAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-12-21T01:06:16.389Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 26,
               "Title": "TwitchApiSettings.cs",
               "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Config\\TwitchApiSettings.cs",
               "RelativeDocumentMoniker": "Config\\TwitchApiSettings.cs",
               "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Config\\TwitchApiSettings.cs",
               "RelativeToolTip": "Config\\TwitchApiSettings.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAUAAAAyAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-12-22T17:25:06.729Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 27,
               "Title": "YouTubeController.cs",
               "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Controllers\\YouTubeController.cs",
               "RelativeDocumentMoniker": "Controllers\\YouTubeController.cs",
               "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\Controllers\\YouTubeController.cs",
               "RelativeToolTip": "Controllers\\YouTubeController.cs",
-              "ViewState": "AgIAAAsAAAAAAAAAAAAqwBYAAAALAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAALAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-12-21T01:11:08.319Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 28,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\appsettings.json",
+              "RelativeDocumentMoniker": "appsettings.json",
+              "ToolTip": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\appsettings.json",
+              "RelativeToolTip": "appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAtAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-12-21T01:04:43.051Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 30,
               "Title": "Task.cs",
               "DocumentMoniker": "C:\\Users\\gakky\\AppData\\Local\\Temp\\.vsdbgsrc\\a09cfc4c24c3019ec95512fcae2deecb033ba97c7ac6f7665c4eff44f1bd85a3\\Task.cs",
               "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\AppData\\Local\\Temp\\.vsdbgsrc\\a09cfc4c24c3019ec95512fcae2deecb033ba97c7ac6f7665c4eff44f1bd85a3\\Task.cs",
               "ToolTip": "C:\\Users\\gakky\\AppData\\Local\\Temp\\.vsdbgsrc\\a09cfc4c24c3019ec95512fcae2deecb033ba97c7ac6f7665c4eff44f1bd85a3\\Task.cs",
               "RelativeToolTip": "..\\..\\..\\..\\..\\AppData\\Local\\Temp\\.vsdbgsrc\\a09cfc4c24c3019ec95512fcae2deecb033ba97c7ac6f7665c4eff44f1bd85a3\\Task.cs",
-              "ViewState": "AgIAAHwGAAAAAAAAAAAAAIoGAAADAAAAAAAAAA==",
+              "ViewState": "AgIAAHYGAAAAAAAAAABVwIoGAAADAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-12-27T15:27:07.854Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 29,
               "Title": "MyApi.csproj",
               "DocumentMoniker": "C:\\Users\\gakky\\Desktop\\MSS\\MultiStreamSearch\\backEnd\\MSS-API\\MyApi.csproj",
               "RelativeDocumentMoniker": "MyApi.csproj",

@@ -1,7 +1,10 @@
 using MyApi.Config;
 using MyApi.Endpoints;
 using MyApi.Interfaces;
+using MyApi.Models;
 using MyApi.Services;
+using MyApi.Services.CacheUpdater;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,8 +30,28 @@ builder.Services.Configure<YouTubeApiSettings>(
 builder.Services.Configure<TwitchApiSettings>(
     builder.Configuration.GetSection("TwitchApi"));
 
+// ★ Redis を追加
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    var config = builder.Configuration.GetConnectionString("Redis");
+    return ConnectionMultiplexer.Connect(config!);
+});
+
+builder.Services.AddSingleton<RedisCacheService>();
+
+
 builder.Services.AddHttpClient<IYouTubeService, YouTubeService>();
 builder.Services.AddHttpClient<ITwitchService, TwitchService>();
+builder.Services.AddScoped<IGameInfoProvider, GameInfoProvider>();
+
+// ★ YouTube のキャッシュ更新サービスを追加
+builder.Services.AddHostedService<YouTubeLiveStreamsCacheUpdater>();
+builder.Services.AddHostedService<YouTubeShortsCacheUpdater>();
+// ★ Twitch のキャッシュ更新サービスを追加
+builder.Services.AddHostedService<TwitchStreamsCacheUpdater>();
+builder.Services.AddHostedService<TwitchClipsCacheUpdater>();
+
+
 
 var app = builder.Build();
 
@@ -39,5 +62,6 @@ app.UseHttpsRedirection();
 // エンドポイント登録
 app.MapYouTubeEndpoints(); 
 app.MapTwitchEndpoints();
+app.MapGameInfoEndpoints();
 
 app.Run();
