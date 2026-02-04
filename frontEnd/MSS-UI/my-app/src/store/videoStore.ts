@@ -1,49 +1,21 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { UnifiedVideo } from "../components/unified/unifiedVideo";
+import type { VideoDataDTO } from "../components/videos/videoData";
+import type { VideoWithAnalysisDTO } from "../components/videos/videoWithAnalysis";
 
-type LiveStreamStore = {
-  results: UnifiedVideo[];
-  setResults: (videos: UnifiedVideo[]) => void;
+type VideoDataStore = {
+  results: VideoDataDTO[];
+  setResults: (videos: VideoDataDTO[]) => void;
 };
 
-export const useLiveStreamStore = create<LiveStreamStore>()(
+export const useVideoDataStore = create<VideoDataStore>()(
   persist(
     (set) => ({
       results: [],
       setResults: (videos) => set({ results: videos }),
     }),
     {
-      name: "liveSearchResults",
-      storage: {
-        getItem: (name) => {
-          const value = sessionStorage.getItem(name);
-          return value ? JSON.parse(value) : null;
-        },
-        setItem: (name, value) => {
-          sessionStorage.setItem(name, JSON.stringify(value));
-        },
-        removeItem: (name) => {
-          sessionStorage.removeItem(name);
-        },
-      },
-    }
-  )
-);
-
-type ShortVideoStore = {
-  results: UnifiedVideo[];
-  setResults: (videos: UnifiedVideo[]) => void;
-};
-
-export const useShortVideoStore = create<ShortVideoStore>()(
-  persist(
-    (set) => ({
-      results: [],
-      setResults: (videos) => set({ results: videos }),
-    }),
-    {
-      name: "shortSearchResults",
+      name: "videoDataResults",
       storage: {
         getItem: (name) => {
           const value = sessionStorage.getItem(name);
@@ -61,18 +33,18 @@ export const useShortVideoStore = create<ShortVideoStore>()(
 );
 
 type CurrentVideoStore = {
-  current: UnifiedVideo | null;
-  setCurrent: (video: UnifiedVideo | null) => void;
+  current: VideoDataDTO | null;
+  setCurrent: (video: VideoDataDTO | null) => void;
 };
 
-export const useCurrentVideoStore = create<CurrentVideoStore>()(
+export const useCurrentVideoDataStore = create<CurrentVideoStore>()(
   persist(
     (set) => ({
       current: null,
       setCurrent: (video) => set({ current: video }),
     }),
     {
-      name: "currentVideo",
+      name: "currentVideoData",
       storage: {
         getItem: (name) => {
           const value = sessionStorage.getItem(name);
@@ -89,4 +61,61 @@ export const useCurrentVideoStore = create<CurrentVideoStore>()(
   )
 );
 
+type VideoWithAnalysisStore = {
+  results: VideoWithAnalysisDTO[];
+  setResults: (videos: VideoWithAnalysisDTO[]) => void;
+};
+
+export const useVideoWithAnalysisStore = create<VideoWithAnalysisStore>()(
+  persist(
+    (set) => ({
+      results: [],
+      setResults: (videos) => set({ results: videos }),
+    }),
+    {
+      name: "videoWithAnalysisResults",
+      storage: {
+        getItem: (name) => {
+          const value = sessionStorage.getItem(name);
+          return value ? JSON.parse(value) : null;
+        },
+        setItem: (name, value) => {
+          sessionStorage.setItem(name, JSON.stringify(value));
+        },
+        removeItem: (name) => {
+          sessionStorage.removeItem(name);
+        },
+      },
+    }
+  )
+);
+
+type CurrentVideoWithAnalysisStore = {
+  current: VideoWithAnalysisDTO | null;
+  setCurrent: (video: VideoWithAnalysisDTO | null) => void;
+};
+
+export const useCurrentVideoWithAnalysisStore = create<CurrentVideoWithAnalysisStore>()(
+  persist(
+    (set) => ({
+      current: null,
+      setCurrent: (video) => set({ current: video }),
+    }),
+    {
+      name: "currentVideoWithAnalysis",
+      storage: {
+        getItem: (name) => {
+          const value = sessionStorage.getItem(name);
+          return value ? JSON.parse(value) : null;
+        },
+        setItem: (name, value) => {
+          sessionStorage.setItem(name, JSON.stringify(value));
+        },
+        removeItem: (name) => {
+          sessionStorage.removeItem(name);
+        },
+      },
+    }
+  )
+);
 

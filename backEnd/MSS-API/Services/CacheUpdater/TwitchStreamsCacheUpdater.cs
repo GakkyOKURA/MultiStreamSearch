@@ -1,4 +1,5 @@
-﻿using MyApi.Interfaces;
+﻿using MyApi.CutomException;
+using MyApi.Interfaces;
 using MyApi.Models;
 using System.Text.Json;
 
@@ -41,33 +42,46 @@ public class TwitchStreamsCacheUpdater : BackgroundService
 
         var startTime = DateTime.Now;
         // CA2254 対策
-        _logger.LogInformation("{StartTime} Twitch Stream キャッシュ更新開始...", startTime);
+        _logger.LogInformation("\n{StartTime} Twitch キャッシュ更新開始...\n", startTime);
 
-        var gameIds = SearchWordHelper.GameIds.Values;
-        foreach ( var gameId in gameIds )
+        VideoDataResponse? response = null;
+        try
         {
-            var result = await twitchService.FetchTwitchStreamsAsync(gameId);
-            var json = JsonSerializer.Serialize(result);
-
-            var cacheKey = CacheKeyHelper.GetCacheKey(CacheKeyHelper.VideoType.TwitchStream, gameId);
-            await cache.SetStringAsync(
-                cacheKey,
-                json,
-                TimeSpan.FromMinutes(2)
-            );
+            response = await twitchService.FetchTwitchStreamsAsync();
         }
+        catch (OperationCanceledException)
+        {
+            var failTime = DateTime.Now;
+            _logger.LogInformation("\n{FailTime} Twitch キャッシュタイムアウト\n", failTime);
+            return;
+        }
+        catch(ApiServiceException ase)
+        {
+            var failTime = DateTime.Now;
+            _logger.LogInformation(
+                "\n{FailTime} {Message} {StatusCode}\n",
+                failTime,
+                ase.Message,
+                ase.StatusCode);
+            return;
+        }
+        var json = JsonSerializer.Serialize(response);
+
+        var cacheKey = CacheKeyHelper.GetCacheKey(CacheKeyHelper.VideoType.TwitchStream);
+        await cache.SetStringAsync(
+            cacheKey,
+            json,
+            TimeSpan.FromMinutes(2)
+        );
 
         var finishTime = DateTime.Now;
-        _logger.LogInformation("{FinishTime} Twitch Stream キャッシュ更新完了", finishTime);
+        _logger.LogInformation("\n{FinishTime} Twitch キャッシュ更新完了\n", finishTime);
     }
 
     // Twitch は API 制限が緩いので1分ごとに更新
     private TimeSpan GetDelayUntilNextUpdate()
     {
         var now = DateTime.Now;
-
-        //TODO:Twitch API は1分毎にアクセス上限を設けているので、
-        //Streams の検索と Clips の検索は同じ分に行わないほうがいい
 
         // 次の分の00秒
         var next = new DateTime(
@@ -81,5 +95,4 @@ public class TwitchStreamsCacheUpdater : BackgroundService
 
         return next - now;
     }
-
 }

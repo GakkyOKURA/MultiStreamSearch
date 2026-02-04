@@ -5,19 +5,17 @@ internal static class CacheKeyHelper
     internal enum VideoType
     {
         YouTubeLiveStream,
-        YouTubeShort,
         TwitchStream,
-        TwitchClip
+        GeminiAnakysis
     }
 
-    internal static string GetCacheKey(VideoType type, string param)
+    internal static string GetCacheKey(VideoType type)
     {
         return type switch
         {
-            VideoType.YouTubeLiveStream => $"youtubeLiveStream:{param}",
-            VideoType.YouTubeShort => $"youtubeShort:{param}",
-            VideoType.TwitchStream => $"twitchStream:{param}",
-            VideoType.TwitchClip => $"twitchClip:{param}",
+            VideoType.YouTubeLiveStream => "youtubeLiveStream",
+            VideoType.TwitchStream => "twitchStream",
+            VideoType.GeminiAnakysis => "geminiAnalysis",
             _ => throw new NotImplementedException()
         };
     }

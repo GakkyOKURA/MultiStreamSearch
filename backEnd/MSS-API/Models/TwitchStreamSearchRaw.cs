@@ -8,13 +8,13 @@ public class TwitchStreamSearchResponse
     public List<TwitchStreamSearchRaw> Data { get; set; } = new();
 
     [JsonPropertyName("pagination")]
-    public TwitchStreamPaginationRaw? Pagination { get; set; }
+    public TwitchStreamPaginationRaw Pagination { get; set; } = new();
 }
 
 public class TwitchStreamPaginationRaw
 {
     [JsonPropertyName("cursor")]
-    public string? Cursor { get; set; }
+    public string Cursor { get; set; } = "";
 }
 
 public class TwitchStreamSearchRaw
@@ -43,6 +43,9 @@ public class TwitchStreamSearchRaw
     [JsonPropertyName("title")]
     public string Title { get; set; } = "";
 
+    [JsonPropertyName("tags")]
+    public List<string> Tags { get; set; } = new();
+
     [JsonPropertyName("viewer_count")]
     public int ViewerCount { get; set; }
 
@@ -56,7 +59,7 @@ public class TwitchStreamSearchRaw
     public string ThumbnailUrl { get; set; } = "";
 
     [JsonPropertyName("tag_ids")]
-    public List<string>? TagIds { get; set; }
+    public List<string> TagIds { get; set; } = new();
 
     [JsonPropertyName("is_mature")]
     public bool IsMature { get; set; }

@@ -5,23 +5,22 @@ using System.Text.Json;
 
 namespace MyApi.Services.CacheUpdater;
 
-public class YouTubeLiveStreamsCacheUpdater : BackgroundService
+public class GeminiCacheUpdater : BackgroundService
 {
-    private readonly ILogger<YouTubeLiveStreamsCacheUpdater> _logger;
+    private readonly ILogger<GeminiCacheUpdater> _logger;
     private readonly IServiceProvider _provider;
 
-    public YouTubeLiveStreamsCacheUpdater(
-        ILogger<YouTubeLiveStreamsCacheUpdater> logger,
+    public GeminiCacheUpdater(
+        ILogger<GeminiCacheUpdater> logger,
         IServiceProvider provider)
     {
         _logger = logger;
         _provider = provider;
     }
 
-    // Program.cs で AddHostedService を登録した瞬間に “常駐サービス” となり、
-    // アプリ起動時に自動で実行される
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        await Task.Delay(10000);
         // 起動時にまず更新
         await UpdateCache(stoppingToken);
 
@@ -35,27 +34,26 @@ public class YouTubeLiveStreamsCacheUpdater : BackgroundService
         }
     }
 
-    // 同じキーに対して新しい値を Set すると、古い値は自動的に上書きされて消える。
-    // TTL（有効期限）も新しく設定される。だからTTLは長めでも大丈夫。
     private async Task UpdateCache(CancellationToken token)
     {
         using var scope = _provider.CreateScope();
 
-        var youTubeService = scope.ServiceProvider.GetRequiredService<IYouTubeService>();
+        var geminiService = scope.ServiceProvider.GetRequiredService<IGeminiService>();
         var cache = scope.ServiceProvider.GetRequiredService<RedisCacheService>();
 
         var startTime = DateTime.Now;
-        _logger.LogInformation("\n{StartTime} YouTube キャッシュ更新開始…\n", startTime);
+        // CA2254 対策
+        _logger.LogInformation("\n{StartTime} Gemini キャッシュ更新開始...\n", startTime);
 
-        VideoDataResponse? response = null;
+        ChannelAnalysisResponse? response = null;
         try
         {
-            response = await youTubeService.FetchYouTubeLiveStreamsAsync();
+            response = await geminiService.FetchVtuberAnalysis();
         }
         catch(OperationCanceledException)
         {
             var failTime = DateTime.Now;
-            _logger.LogInformation("\n{FailTime} YouTube キャッシュタイムアウト\n", failTime);
+            _logger.LogInformation("\n{FailTime} Gemini キャッシュタイムアウト\n", failTime);
             return;
         }
         catch(ApiServiceException ase)
@@ -70,19 +68,18 @@ public class YouTubeLiveStreamsCacheUpdater : BackgroundService
         }
         var json = JsonSerializer.Serialize(response);
 
-        var cacheKey = CacheKeyHelper.GetCacheKey(CacheKeyHelper.VideoType.YouTubeLiveStream);
+        var cacheKey = CacheKeyHelper.GetCacheKey(CacheKeyHelper.VideoType.GeminiAnakysis);
         await cache.SetStringAsync(
             cacheKey,
             json,
-            TimeSpan.FromHours(1) // TTLは長め
+            TimeSpan.FromMinutes(60)
         );
 
         var finishTime = DateTime.Now;
-        _logger.LogInformation("\n{FinishTime} YouTube キャッシュ更新完了\n", finishTime);
+        _logger.LogInformation("\n{FinishTime} Gemini キャッシュ更新完了\n", finishTime);
     }
 
-    //TODO: クォータ増加したら更新頻度増やす
-    // youtube は 30 分毎に更新
+    // Gemini は 2分ごとに更新
     private TimeSpan GetDelayUntilNextUpdate()
     {
         var now = DateTime.Now;
@@ -100,4 +97,3 @@ public class YouTubeLiveStreamsCacheUpdater : BackgroundService
         return next - now;
     }
 }
-

@@ -1,4 +1,5 @@
 ﻿using StackExchange.Redis;
+using System.Text.Json;
 
 namespace MyApi.Services;
 public class RedisCacheService
@@ -18,5 +19,16 @@ public class RedisCacheService
     public async Task<string?> GetStringAsync(string key)
     {
         return await _db.StringGetAsync(key);
+    }
+
+    public async Task<T?> GetAsync<T>(string key)
+    {
+        var json = await _db.StringGetAsync(key);
+        if (json.IsNullOrEmpty)
+        {
+            return default;
+        }
+
+        return JsonSerializer.Deserialize<T>(json!);
     }
 }

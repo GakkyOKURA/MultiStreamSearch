@@ -5,6 +5,7 @@ using MyApi.Models;
 using MyApi.Services;
 using MyApi.Services.CacheUpdater;
 using StackExchange.Redis;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,8 +30,10 @@ builder.Services.Configure<YouTubeApiSettings>(
     builder.Configuration.GetSection("YouTubeApi"));
 builder.Services.Configure<TwitchApiSettings>(
     builder.Configuration.GetSection("TwitchApi"));
+builder.Services.Configure<GeminiApiSettings>(
+    builder.Configuration.GetSection("GeminiApi"));
 
-// ★ Redis を追加
+// Redis を追加
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
     var config = builder.Configuration.GetConnectionString("Redis");
@@ -42,26 +45,23 @@ builder.Services.AddSingleton<RedisCacheService>();
 
 builder.Services.AddHttpClient<IYouTubeService, YouTubeService>();
 builder.Services.AddHttpClient<ITwitchService, TwitchService>();
-builder.Services.AddScoped<IGameInfoProvider, GameInfoProvider>();
+builder.Services.AddHttpClient<IGeminiService, GeminiService>();
+builder.Services.AddScoped<IVideoService, VideoService>();
 
-// ★ YouTube のキャッシュ更新サービスを追加
+// YouTube のキャッシュ更新サービスを追加
 builder.Services.AddHostedService<YouTubeLiveStreamsCacheUpdater>();
-builder.Services.AddHostedService<YouTubeShortsCacheUpdater>();
-// ★ Twitch のキャッシュ更新サービスを追加
+// Twitch のキャッシュ更新サービスを追加
 builder.Services.AddHostedService<TwitchStreamsCacheUpdater>();
-builder.Services.AddHostedService<TwitchClipsCacheUpdater>();
-
-
+// Gemini のキャッシュ更新サービスを追加
+builder.Services.AddHostedService<GeminiCacheUpdater>();
 
 var app = builder.Build();
 
-// ★ CORS を有効化（UseHttpsRedirection の前）
+// CORS を有効化（UseHttpsRedirection の前）
 app.UseCors();
 app.UseHttpsRedirection();
 
 // エンドポイント登録
-app.MapYouTubeEndpoints(); 
-app.MapTwitchEndpoints();
-app.MapGameInfoEndpoints();
+app.MapVideoEndpoints();
 
 app.Run();

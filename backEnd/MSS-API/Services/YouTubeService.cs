@@ -1,9 +1,13 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using Microsoft.Extensions.Options;
 using MyApi.Config;
 using MyApi.Interfaces;
 using MyApi.Models;
+using MyApi.Models.Channels;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using MyApi.CutomException;
 
 namespace MyApi.Services;
 
@@ -12,11 +16,7 @@ public class YouTubeService : IYouTubeService
     private readonly RedisCacheService _cache;
     private readonly HttpClient _httpClient;
     private readonly YouTubeApiSettings _settings;
-    private static readonly HttpClientHandler _shortsHandler = new()
-    {
-        AllowAutoRedirect = false // ← リダイレクトを自動で追わない
-    };
-    private static readonly HttpClient _shortsClient = new(_shortsHandler);
+    
 
     public YouTubeService(RedisCacheService cache, HttpClient httpClient, IOptions<YouTubeApiSettings> settings)
     {
@@ -25,210 +25,10 @@ public class YouTubeService : IYouTubeService
         _settings = settings.Value;
     }
 
-    // ユーザーからのアクセス
-    public async Task<YouTubeSearchResult> SearchYouTubeShortsAsync(string keyword)
+    public async Task<VideoDataResponse> SearchYouTubeLiveStreamsAsync()
     {
-        var cacheKey = CacheKeyHelper.GetCacheKey(CacheKeyHelper.VideoType.YouTubeShort, keyword);
-
-        // Redis から取得
-        var cached = await _cache.GetStringAsync(cacheKey);
-        if (cached is null)
-        {
-            // キャッシュが無い場合は API を叩かず、エラーを返す
-            throw new Exception("Cache not ready. Please try again later.");
-        }
-
-        var result = JsonSerializer.Deserialize<YouTubeSearchResult>(cached);
-        return result ?? new YouTubeSearchResult();
-    }
-
-    // バックエンドからのアクセス
-    public async Task<YouTubeSearchResult> FetchYouTubeShortsAsync(string keyword)
-    {
-        //search.list → YouTubeSearchResponseに変換
-        var response = await SearchVideoIdsAsync(keyword);
-
-        //リダイレクトを用いてshort動画を判定
-        var shortVideos = await GetShortVideosAsync(response);
-
-        // 日付順に並び替える
-        var orderedShorts = GetOrderedShortsByDateDescending(shortVideos);
-
-        //日本語を前に
-        var japaneseSortedShort = SortJapaneseFirst(orderedShorts);
-
-        // YouTubeSearchResult に整形し、不要な情報を削除
-        var result = GetResult(japaneseSortedShort);
-        return result;
-    }
-
-    private List<YouTubeSearchItemRaw> GetOrderedShortsByDateDescending(YouTubeSearchResponse response)
-    {
-        return response.Items
-            .OrderByDescending(v => v.Snippet.PublishedAt)
-            .ToList();
-    }
-
-    private YouTubeSearchResult GetResult(List<YouTubeSearchItemRaw> pItems)
-    {
-        var items = pItems
-            .Select(shortInfo => new YouTubeSearchItemDto
-            {
-                Id = new YouTubeSearchItemIdDto
-                {
-                    VideoId = shortInfo.Id.VideoId,
-                    ChannelId = shortInfo.Id.ChannelId,
-                },
-                Snippet = new YouTubeSnippetDto
-                {
-                    ChannelId = shortInfo.Snippet.ChannelId,
-                    Title = shortInfo.Snippet.Title,
-                    Description = shortInfo.Snippet.Description,
-                    Thumbnails = new YouTubeThumbnailsDto
-                    {
-                        Medium = new YouTubeThumbnailDto
-                        {
-                            Url = shortInfo.Snippet.Thumbnails.Medium.Url,
-                            Width = shortInfo.Snippet.Thumbnails.Medium.Width,
-                            Height = shortInfo.Snippet.Thumbnails.Medium.Height
-                        }
-                    },
-                    ChannelTitle = shortInfo.Snippet.ChannelTitle,
-                }
-            })
-            .ToList();
-
-        return new YouTubeSearchResult
-        {
-            Items = items
-        };
-    }
-
-    private async Task<YouTubeSearchResponse> SearchVideoIdsAsync(string keyword)
-    {
-        var url = $"https://www.googleapis.com/youtube/v3/search" +
-                  $"?part=snippet" +
-                  $"&type=video" +
-                  $"&regionCode=JP" +
-                  $"&relevanceLanguage=ja" +
-                  $"&maxResults=50" +
-                  $"&order=date" +
-                  $"&videoDuration=short" + // 4分未満に絞る
-                  $"&q={Uri.EscapeDataString(keyword)}" +
-                  $"&key={_settings.ApiKey}";
-
-        //TODO:期間を指定した検索
-        // YouTube のクォータ制限が緩和されたら実装
-        url += $"&publishedAfter={SearchPeriodHelper.GetStartDate(SearchPeriod.Day)!.Value:O}";
-
-        var response = await _httpClient.GetAsync(url);
-        if (!response.IsSuccessStatusCode)
-        {
-            throw new Exception($"YouTube API error: {response.StatusCode}");
-        }
-
-        var json = await response.Content.ReadAsStringAsync();
-
-        var result = JsonSerializer.Deserialize<YouTubeSearchResponse>(json);
-        if (result is null)
-        {
-            return new YouTubeSearchResponse();
-        }
-
-        return result;
-    }
-
-    private async Task<YouTubeSearchResponse> GetShortVideosAsync(YouTubeSearchResponse respose)
-    {
-        //並列処理で全動画を同時に判定
-        var tasks = respose.Items.Select(async item =>
-        {
-            var isShort = await IsShortVideoAsync(item.Id.VideoId);
-            return (item, isShort);
-        });
-
-        var results = await Task.WhenAll(tasks);
-
-        return new YouTubeSearchResponse
-        {
-            Items = results
-                .Where(r => r.isShort)
-                .Select(r => r.item)
-                .ToList()
-        };
-    }
-
-    private async Task<bool> IsShortVideoAsync(string videoId)
-    {
-        var url = $"https://www.youtube.com/shorts/{videoId}";
-
-        // HEAD で十分（本文不要）
-        using var request = new HttpRequestMessage(HttpMethod.Head, url);
-
-        var response = await _shortsClient.SendAsync(request);
-
-        // リダイレクトされる場合は 301 / 302 / 303 / 307 / 308 のいずれか
-        if ((int)response.StatusCode >= 300 && (int)response.StatusCode < 400)
-        {
-            // Location が /watch?v=... なら通常動画
-            var location = response.Headers.Location?.ToString() ?? "";
-
-            if (location.Contains("/watch"))
-            {
-                return false; // 通常動画
-            }
-        }
-
-        return true; // リダイレクトなし → Shorts
-    }
-
-    // ユーザーからのアクセス
-    public async Task<YouTubeSearchResult> SearchYouTubeLiveStreamsAsync(string keyword)
-    {
-        var cacheKey = CacheKeyHelper.GetCacheKey(CacheKeyHelper.VideoType.YouTubeLiveStream, keyword);
-
-        // Redis から取得
-        var cached = await _cache.GetStringAsync(cacheKey);
-        if (cached is null)
-        {
-            // キャッシュが無い場合は API を叩かず、エラーを返す
-            throw new Exception("Cache not ready. Please try again later.");
-        }
-
-        var result = JsonSerializer.Deserialize<YouTubeSearchResult>(cached);
-        return result ?? new YouTubeSearchResult();
-    }
-
-    //バックエンドからのアクセス
-    public async Task<YouTubeSearchResult> FetchYouTubeLiveStreamsAsync(string keyword)
-    {
-        var url =
-            "https://www.googleapis.com/youtube/v3/search" +
-            $"?part=snippet" +
-            $"&type=video" +
-            $"&eventType=live" +
-            $"&regionCode=JP" +
-            $"&relevanceLanguage=ja" +
-            $"&maxResults=50" +
-            $"&q={Uri.EscapeDataString(keyword)}" +
-            $"&key={_settings.ApiKey}";
-
-        var httpResponse = await _httpClient.GetAsync(url);
-        if (!httpResponse.IsSuccessStatusCode)
-        {
-            throw new Exception($"YouTube API error: {httpResponse.StatusCode}");
-        }
-
-        var json = await httpResponse.Content.ReadAsStringAsync();
-        var response = JsonSerializer.Deserialize<YouTubeSearchResponse>(json);
-        if(response is null)
-        {
-            return new YouTubeSearchResult();
-        }
-
-        var sortedResponse = SortJapaneseFirst(response.Items);
-        var result = GetResult(sortedResponse);
-        return result;
+        var cacheKey = CacheKeyHelper.GetCacheKey(CacheKeyHelper.VideoType.YouTubeLiveStream);
+        return await _cache.GetAsync<VideoDataResponse>(cacheKey) ?? new();
     }
 
     //チャンネル名とタイトルどちらかに日本語が入っていれば日本語の動画判定とする
@@ -249,5 +49,160 @@ public class YouTubeService : IYouTubeService
         return Regex.IsMatch(text, @"[\u3040-\u30FF\u4E00-\u9FFF]");
     }
 
+    public async Task<VideoDataResponse> FetchYouTubeLiveStreamsAsync()
+    {
+        var searchResponse = await GetYouTubeLiveStreamsAsync();
+        if(searchResponse.Items.Count == 0)
+        {
+            return new VideoDataResponse();
+        }
+
+        var channelResponse = await GetChannelInformationAsync(searchResponse.Items);
+        var dto = ToDTO(searchResponse.Items, channelResponse.Items);
+        dto.Items = dto.Items
+            .Where(v => !IndividualChecker.IsCompany(v.ChannelDescription))
+            .ToList();
+        return dto;
+    }
+
+    private async Task<YouTubeSearchResponse> GetYouTubeLiveStreamsAsync()
+    {
+        var allResponse = new YouTubeSearchResponse();
+
+        var baseUrl =
+            "https://www.googleapis.com/youtube/v3/search" +
+            $"?part=snippet" +
+            $"&type=video" +
+            $"&eventType=live" +
+            $"&regionCode=JP" +
+            $"&relevanceLanguage=ja" +
+            $"&maxResults=50" +
+            $"&q=Vtuber" +
+            $"&key={_settings.ApiKey}";
+
+        var nextPageToken = "";
+        var searchCount = 2; //今後 api 制限が緩和したら増やす
+        for (var i = 0; i < searchCount; i++)
+        {
+            var url = baseUrl;
+
+            if(!string.IsNullOrEmpty(nextPageToken))
+            {
+                url += $"&pageToken={nextPageToken}";
+            }
+
+            var httpResponse = await _httpClient.GetAsync(url);
+            if (!httpResponse.IsSuccessStatusCode)
+            {
+                throw new ApiServiceException("Search.list リクエスト失敗", (int)httpResponse.StatusCode);
+            }
+
+            var json = await httpResponse.Content.ReadAsStringAsync();
+            var response = JsonSerializer.Deserialize<YouTubeSearchResponse>(json);
+            if (response is null)
+            {
+                return new();
+            }
+
+            allResponse.Items.AddRange(response.Items);
+            // 完全に重複を除く
+            allResponse.Items = allResponse.Items
+                .DistinctBy(v => v.Id.VideoId)
+                .DistinctBy(v => v.Id.ChannelId)
+                .ToList();
+            if(string.IsNullOrEmpty(response.NextPageToken))
+            {
+                break;
+            }
+            nextPageToken = response.NextPageToken;
+        }
+
+        return allResponse;
+    }
+
+    private async Task<YouTubeChannelsResponse> GetChannelInformationAsync(List<YouTubeSearchItemRaw> items)
+    {
+        var channelIdBatches = items
+            .Select(x => x.Snippet.ChannelId)
+            .Chunk(50)
+            .ToList();
+
+        var allResults = new YouTubeChannelsResponse();
+
+        foreach (var batch in channelIdBatches)
+        {
+            var ids = string.Join(",", batch);
+
+            var url =
+                $"https://www.googleapis.com/youtube/v3/channels" +
+                $"?part=snippet,brandingSettings,topicDetails" +
+                $"&id={ids}" +
+                $"&key={_settings.ApiKey}";
+
+            var httpResponse = await _httpClient.GetAsync(url);
+            if (!httpResponse.IsSuccessStatusCode)
+            {
+                throw new ApiServiceException($"Channels.list リクエスト失敗", (int)httpResponse.StatusCode);
+            }
+
+            var json = await httpResponse.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<YouTubeChannelsResponse>(json);
+
+            if (result?.Items is not null)
+            {
+                allResults.Items.AddRange(result.Items);
+            }
+        }
+
+        return allResults;
+    }
+
+    private VideoDataResponse ToDTO(List<YouTubeSearchItemRaw> sItems, List<YouTubeChannelItemRaw> cItems)
+    {
+        return new VideoDataResponse
+        {
+            Items = sItems
+                .Join(
+                    cItems,
+                    s => s.Snippet.ChannelId,
+                    c => c.Id,
+                    (s, c) => new VideoDataDTO
+                    {
+                        VideoId = s.Id.VideoId,
+                        VideoTitle = s.Snippet.Title,
+                        ChannelId = s.Snippet.ChannelId,
+                        ChannelName = s.Snippet.ChannelTitle,
+                        SearchDescription = s.Snippet.Description,
+                        ChannelDescription = c.Snippet.Description,
+                        SearchHighTumbnail = new VideoHighThumbnailDTO
+                        {
+                            Url = $"https://i.ytimg.com/vi/{s.Id.VideoId}/hq720.jpg",//s.Snippet.Thumbnails.High.Url,
+                            Width = 1280,//s.Snippet.Thumbnails.High.Width,
+                            Height = 720,//s.Snippet.Thumbnails.High.Height,
+                        },
+                        ChannelHighThumbnail = new VideoHighThumbnailDTO
+                        {
+                            Url = c.Snippet.Thumbnails.High.Url,
+                            Width = c.Snippet.Thumbnails.High.Width,
+                            Height = c.Snippet.Thumbnails.High.Height
+                        },
+                        Keywords = c.BrandingSettings.Channel.Keywords,
+                        BannerExternalUrl = c.BrandingSettings.Image.BannerExternalUrl,
+                        TopicCategories = c.TopicDetails.TopicCategories
+                            .Select
+                            (
+                                // AI と人間が読みやすいように アンダーバー、特殊文字を修正
+                                url => System.Net.WebUtility.UrlDecode(
+                                url.Split('/')
+                                .Last()
+                                .Replace("_", " "))
+                            )
+                            .ToList(),
+                        Platform = VIdeoPlatform.YouTube
+                    }
+                )
+                .ToList()
+        };
+    }
 }
 

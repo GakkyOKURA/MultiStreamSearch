@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using MyApi.Config;
+using MyApi.CutomException;
 using MyApi.Interfaces;
 using MyApi.Models;
+using System.IO;
 using System.Text.Json;
 
 namespace MyApi.Services;
@@ -23,10 +25,10 @@ public class TwitchService : ITwitchService
         _settings = settings.Value;
     }
 
-    // ★ アプリ用トークンを取得（Client Credentials Flow）
-    public async Task<string> GetAccessTokenAsync()
+    // アプリ用トークンを取得（Client Credentials Flow）
+    private async Task<string> GetAccessTokenAsync()
     {
-        // ★ 有効なトークンがあれば再利用
+        // 有効なトークンがあれば再利用
         if (_cachedToken != null && DateTime.UtcNow < _tokenExpiresAt)
         {
             return _cachedToken;
@@ -53,117 +55,59 @@ public class TwitchService : ITwitchService
         return _cachedToken!;
     }
 
-    // ユーザーからのアクセス
-    public async Task<TwitchStreamSearchResult> SearchTwitchStreamsAsync(string gameId)
+    public async Task<VideoDataResponse> SearchTwitchStreamsAsync()
     {
-        var cacheKey = CacheKeyHelper.GetCacheKey(CacheKeyHelper.VideoType.TwitchStream, gameId);
-
-        var cached = await _cache.GetStringAsync(cacheKey);
-        if(cached is null)
-        {
-            throw new Exception("Cache not ready. Please try again later.");
-        }
-
-        var result = JsonSerializer.Deserialize<TwitchStreamSearchResult>(cached);
-        return result ?? new TwitchStreamSearchResult();
+        var cacheKey = CacheKeyHelper.GetCacheKey(CacheKeyHelper.VideoType.TwitchStream);
+        return await _cache.GetAsync<VideoDataResponse>(cacheKey) ?? new();
     }
 
-    // バックエンドからのアクセス
-    public async Task<TwitchStreamSearchResult> FetchTwitchStreamsAsync(string gameId)
+    public async Task<VideoDataResponse> FetchTwitchStreamsAsync()
     {
-        var token = await GetAccessTokenAsync();
-
-        var url = $"https://api.twitch.tv/helix/streams?game_id={gameId}&language=ja&first=50";
-
-        var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Add("Client-ID", _settings.ClientId);
-        request.Headers.Add("Authorization", $"Bearer {token}");
-
-        var httpResponse = await _httpClient.SendAsync(request);
-        if (!httpResponse.IsSuccessStatusCode)
+        var result = new VideoDataResponse();
+        TwitchStreamPaginationRaw? oldPagination = null;
+        // while が適切だが無限ループが怖いので for にしとく
+        for (var i = 0; i < 5; i++)
         {
-            throw new Exception($"Twitch API error: {httpResponse.StatusCode}");
-        }
+            var streamResponse = await GetVtuberTwitchStreamsAsync(oldPagination);
+            
+            oldPagination = streamResponse.Pagination;
 
-        var json = await httpResponse.Content.ReadAsStringAsync();
-        var response = JsonSerializer.Deserialize<TwitchStreamSearchResponse>(json);
-        if(response is null)
-        {
-            return new TwitchStreamSearchResult();
-        }
+            var channelResponse = await GetChannelInformationAsync(streamResponse.Data);
+            var dto = ToDTO(streamResponse.Data, channelResponse.Data);
+            var individual = dto.Items
+                .Where(v => !IndividualChecker.IsCompany(v.ChannelDescription))
+                .ToList();
 
-        var result = GetStreamResult(response);
-        return result;
-    }
-
-    private TwitchStreamSearchResult GetStreamResult(TwitchStreamSearchResponse response)
-    {
-        var dataDto = response.Data
-            .Select(v => new TwitchStreamSearchDto
+            result.Items.AddRange(individual);
+            if(result.Items.Count >= 100 || string.IsNullOrEmpty(oldPagination.Cursor))
             {
-                Id = v.Id,
-                UserId = v.UserId,
-                UserLogin = v.UserLogin,
-                UserName = v.UserName,
-                GameId = v.GameId,
-                GameName = v.GameName,
-                Title = v.Title,
-                ThumbnailUrl = v.ThumbnailUrl
-            })
-            .ToList();
-
-        return new TwitchStreamSearchResult
-        {
-            Data = dataDto
-        };
-    }
-
-    // ユーザーからのアクセス
-    public async Task<TwitchClipSearchResult> SearchTwitchClipsAsync(string gameId)
-    {
-        var cacheKey = CacheKeyHelper.GetCacheKey(CacheKeyHelper.VideoType.TwitchClip, gameId);
-
-        var cached = await _cache.GetStringAsync(cacheKey);
-        if(cached is null )
-        {
-            throw new Exception("Cache not ready. Please try again later.");
+                result.Items = result.Items
+                    .Take(100)
+                    .ToList();
+                break;
+            }
         }
 
-        var result = JsonSerializer.Deserialize<TwitchClipSearchResult>(cached);
-        return result ?? new TwitchClipSearchResult();
-    }
-
-    // バックエンドからのアクセス
-    public async Task<TwitchClipSearchResult> FetchTwitchClipsAsync(string gameId)
-    {
-        // clip 検索は言語でのフィルタリングができないから
-        // 最大1000件取得し、日本語に絞る
-        var respose = await FetchJapaneseTwitchClipsAsync(gameId);
-
-        // TwitchClipSearchResult に整形
-        var result = GetClipResult(respose);
         return result;
     }
 
-    private async Task<TwitchClipSearchResponse> FetchJapaneseTwitchClipsAsync(string gameId)
+    private async Task<TwitchStreamSearchResponse> GetVtuberTwitchStreamsAsync(TwitchStreamPaginationRaw? oldPaination = null)
     {
         var token = await GetAccessTokenAsync();
-        
-        var baseUrl = $"https://api.twitch.tv/helix/clips?game_id={gameId}" +
-            $"&first=100";
 
-        //TODO:期間を指定した検索
-        // YouTube のクォータ制限が緩和されたら実装
-        baseUrl += $"&started_at={SearchPeriodHelper.GetStartDate(SearchPeriod.Day)!.Value:O}";
+        var baseUrl =
+            "https://api.twitch.tv/helix/streams" +
+            "?language=ja" +
+            "&first=100";
 
-        var maxSearchRoop = 10;
-        var pagination = new TwitchClipPaginationRaw();
-        var data = new List<TwitchClipSearchRaw>();
+        var maxSearchRoop = 20;
+        var pagination = oldPaination ?? new TwitchStreamPaginationRaw();
+        var data = new List<TwitchStreamSearchRaw>();
         for (var i = 0; i < maxSearchRoop; i++)
         {
             var url = baseUrl;
 
-            if(!string.IsNullOrEmpty(pagination.Cursor))
+            if (!string.IsNullOrEmpty(pagination.Cursor))
             {
                 url += $"&after={pagination.Cursor}";
             }
@@ -175,114 +119,159 @@ public class TwitchService : ITwitchService
             var httpResponse = await _httpClient.SendAsync(request);
             if (!httpResponse.IsSuccessStatusCode)
             {
-                throw new Exception($"Twitch API error: {httpResponse.StatusCode}");
+                throw new ApiServiceException($"Get Stream リクエスト失敗", (int)httpResponse.StatusCode);
+            }
+
+            if (httpResponse.Headers.TryGetValues("Ratelimit-Remaining", out var values))
+            {
+                var remaining = values.FirstOrDefault();
+                Console.WriteLine($"残りのリクエスト回数: {remaining}");
             }
 
             var json = await httpResponse.Content.ReadAsStringAsync();
 
             // TwitchClipSearchResponse 型に変換
-            var response = JsonSerializer.Deserialize<TwitchClipSearchResponse>(json);
+            var response = JsonSerializer.Deserialize<TwitchStreamSearchResponse>(json);
             if (response is null)
             {
-                return new TwitchClipSearchResponse();
+                return new();
             }
 
             pagination = response.Pagination;
 
-            var japaneseClip = GetJapaneseClip(response);
-            data.AddRange(japaneseClip);
+            var vtuberStream = FilterVtuberStream(response);
+            data.AddRange(vtuberStream);
 
             //Twitch API の仕様上、 page1 の末尾と page2 の先頭に
-            //同じクリップが入ることがある。それを防ぐ。
+            //同じ動画が入ることがある。それを防ぐ。
             data = data
                 .DistinctBy(v => v.Id)
                 .ToList();
 
-            // data が 50 を超えた場合は cursor が残ってても break
+            // data が 100 を超えた場合は cursor が残ってても break
             // cursor が無くなった = 最後まで検索された場合は break
-            if (data.Count > 50 || string.IsNullOrEmpty(pagination.Cursor))
+            if (data.Count >= 100 || string.IsNullOrEmpty(pagination.Cursor))
             {
-                data = data
-                    .OrderByDescending(v => v.CreatedAt)// 最新の動画を前に
-                    .Take(50)
-                    .ToList();
                 break;
             }
         }
 
-        return new TwitchClipSearchResponse
+        return new TwitchStreamSearchResponse
         {
             Data = data,
             Pagination = pagination
         };
     }
 
-    private List<TwitchClipSearchRaw> GetJapaneseClip(TwitchClipSearchResponse response)
+    private List<TwitchStreamSearchRaw> FilterVtuberStream(TwitchStreamSearchResponse response )
     {
         return response.Data
-            .Where(v => v.Language == "ja")
+            .Where(v => v.Tags is not null)
+            .Where(v => IsVtuber(v.Tags))
             .ToList();
     }
 
-    private TwitchClipSearchResult GetClipResult(TwitchClipSearchResponse response)
+    private bool IsVtuber(List<string> tags)
     {
-        var dataDto = response.Data
-            .Select(v => new TwitchClipSearchDto
-            {
-                Id = v.Id,
-                Url = v.Url,
-                EmbedUrl = v.EmbedUrl,
-                BroadcasterId = v.BroadcasterId,
-                BroadcasterName = v.BroadcasterName,
-                VideoId = v.VideoId,
-                Title = v.Title,
-                ThumbnailUrl = v.ThumbnailUrl
-            })
-            .ToList();
+        // いずれかのタグの中に "vtuber" という単語が含まれているか
+        return tags.Any(t => t.Contains("vtuber", StringComparison.OrdinalIgnoreCase));
+    }
 
-        return new TwitchClipSearchResult
+    private async Task<TwitchUserResponse> GetChannelInformationAsync(List<TwitchStreamSearchRaw> data)
+    {
+        if (data.Count == 0)
         {
-            Data = dataDto
+            return new TwitchUserResponse();
+        }
+
+        var token = await GetAccessTokenAsync();
+        var allUsers = new List<TwitchUserRaw>(); // 全結果を格納するリスト
+
+        // 50個ずつのチャンクに分けて処理
+        foreach (var chunk in data.Chunk(50))
+        {
+            var idQuery = string.Join("&id=", chunk.Select(s => s.UserId));
+            var url = $"https://api.twitch.tv/helix/users?id={idQuery}";
+
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+            request.Headers.Add("Client-ID", _settings.ClientId);
+            request.Headers.Add("Authorization", $"Bearer {token}");
+
+            var httpResponse = await _httpClient.SendAsync(request);
+            if (!httpResponse.IsSuccessStatusCode)
+            {
+                throw new ApiServiceException("Get Users リクエスト失敗", (int)httpResponse.StatusCode);
+            }
+
+            var json = await httpResponse.Content.ReadAsStringAsync();
+            var userResponse = JsonSerializer.Deserialize<TwitchUserResponse>(json);
+
+            if (userResponse?.Data is not null)
+            {
+                allUsers.AddRange(userResponse.Data);
+            }
+
+            // レート制限のログ（必要なら）
+            if (httpResponse.Headers.TryGetValues("Ratelimit-Remaining", out var values))
+            {
+                Console.WriteLine($"Twitch API Remaining: {values.FirstOrDefault()}");
+            }
+        }
+
+        return new TwitchUserResponse { Data = allUsers };
+    }
+
+    private VideoDataResponse ToDTO(List<TwitchStreamSearchRaw> sData, List<TwitchUserRaw> cData)
+    {
+        if(sData.Count == 0 || cData.Count == 0)
+        {
+            return new VideoDataResponse();
+        }
+
+        return new VideoDataResponse
+        {
+            Items = sData
+                .Join(
+                cData,
+                s => s.UserId,
+                u => u.Id,
+                (s, u) => new VideoDataDTO // YouTubeと共通のDTOに変換
+                {
+                    VideoId = s.Id,
+                    VideoTitle = s.Title,
+                    ChannelId = s.UserLogin,//UserId,
+                    ChannelName = s.UserName,
+                    // Twitch の概要欄をセット
+                    SearchDescription = s.Title, // Twitchには動画単位の説明文がないのでタイトルを流用
+                    ChannelDescription = u.Description,
+
+                    // サムネイルURLの {width}x{height} を置換
+                    SearchHighTumbnail = new VideoHighThumbnailDTO
+                    {
+                        Url = s.ThumbnailUrl.Replace("{width}", "1280").Replace("{height}", "720"),
+                        Width = 1280,
+                        Height = 720
+                    },
+                    ChannelHighThumbnail = new VideoHighThumbnailDTO
+                    {
+                        Url = u.ProfileImageUrl,
+                        Width = 300,
+                        Height = 300
+                    },
+
+                    // KeywordsをTwitchのデータから合成する
+                    Keywords = string.Join(", ", new List<string>
+                    {
+                        s.GameName,
+                        u.BroadcasterType,
+                        string.Join(", ", s.Tags)
+                    }
+                    .Where(str => !string.IsNullOrEmpty(str))), // 空文字を除外
+
+                    BannerExternalUrl = u.OfflineImageUrl,
+                    TopicCategories = s.Tags, // YouTubeのGenresと同じ扱い
+                    Platform = VIdeoPlatform.Twitch
+                }).ToList()
         };
     }
-
-
-    // ★ Twitch のカテゴリ検索（ゲームカテゴリ）
-    // 将来的にゲームが自由に検索できるようになれば使用。
-    // 現在は検索できるゲームを手動で指定
-
-    //private static readonly Dictionary<string, string> _cache = new();
-
-    //public async Task<string> SearchCategoriesAsync(string keyword)
-    //{
-    //    // キャッシュチェック
-    //    if (_cache.TryGetValue($"cat:{keyword}", out var cached))
-    //    {
-    //        return cached;
-    //    }
-
-    //    var token = await GetAccessTokenAsync();
-
-    //    var request = new HttpRequestMessage(
-    //        HttpMethod.Get,
-    //        $"https://api.twitch.tv/helix/search/categories?query={keyword}"
-    //    );
-
-    //    request.Headers.Add("Client-ID", _settings.ClientId);
-    //    request.Headers.Add("Authorization", $"Bearer {token}");
-
-    //    var response = await _httpClient.SendAsync(request);
-
-    //    if (!response.IsSuccessStatusCode)
-    //    {
-    //        throw new Exception($"Twitch API error: {response.StatusCode}");
-    //    }
-
-    //    var json = await response.Content.ReadAsStringAsync();
-
-    //    // ★ カテゴリ検索は prefix を付けてキャッシュ
-    //    _cache[$"cat:{keyword}"] = json;
-
-    //    return json;
-    //}
 }

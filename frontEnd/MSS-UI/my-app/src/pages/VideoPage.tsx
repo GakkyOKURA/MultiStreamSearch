@@ -1,13 +1,17 @@
 //共通の動画再生ページ
 import { useParams } from "react-router-dom";
 import {
-  useCurrentVideoStore,
-  useLiveStreamStore,
-  useShortVideoStore,
+  useCurrentVideoDataStore,
+  useVideoDataStore,
 } from "../store/videoStore";
-import type { UnifiedVideo } from "../components/unified/unifiedVideo";
-import { AspectRatio, Box, Flex, Text } from "@chakra-ui/react";
-import { UnifiedVideoCard } from "../components/unified/unifiedVideoCard";
+import {
+  AspectRatio,
+  Box,
+  Flex,
+  Image,
+  Separator,
+  Text,
+} from "@chakra-ui/react";
 
 const VideoPage = () => {
   const { platform, id } = useParams();
@@ -15,32 +19,46 @@ const VideoPage = () => {
     return;
   }
 
-  const liveStreamResult = useLiveStreamStore((s) => s.results);
-  const shortVideoResult = useShortVideoStore((s) => s.results);
-  const paramVideo =
-    platform === "youtubeLiveStream" || platform === "twitchStream"
-      ? liveStreamResult
-      : shortVideoResult;
+  const videoDataResult = useVideoDataStore((s) => s.results);
+  const paramVideo = videoDataResult;
 
-  const currentVideo = useCurrentVideoStore((s) => s.current);
+  const currentVideo = useCurrentVideoDataStore((s) => s.current);
   if (!currentVideo) {
     return;
   }
 
   return (
     <Flex height="100vh">
-      {/* 左：プレイヤー */}{" "}
+      {/* 左：プレイヤー */}
       <Box flex="7" pl="40px" py="20px" pr="15px">
         <VideoPlayer platform={platform} id={id} />
 
         <Box mb="16px">
           <Text fontSize="2xl" fontWeight="bold">
-            {currentVideo.title}
+            {currentVideo.videoTitle}
           </Text>
 
-          <Text fontSize="md" color="gray.500">
-            {currentVideo.channelName}
-          </Text>
+          <Flex>
+            <Image
+              src={currentVideo.channelHighThumbnail.url}
+              alt={currentVideo.channelName}
+              boxSize="80px"
+              borderRadius="full"
+              flexShrink={0} // ← アイコンが潰れないように
+            />
+            <Text
+              fontSize="medium"
+              marginTop="30px"
+              marginLeft="20px"
+              fontWeight="bold"
+            >
+              {currentVideo.channelName}
+            </Text>
+          </Flex>
+
+          <Separator my={3} borderColor="gray.500" borderWidth="1px" />
+
+          <Text fontSize="md">{currentVideo.channelDescription}</Text>
         </Box>
       </Box>
       {/* 右：リスト */}
@@ -111,49 +129,12 @@ export const VideoPlayer = ({
   }
 };
 
-// export const VideoList = ({ videos }: { videos: UnifiedVideo[] }) => {
-//   return (
-//     <div style={{ overflowY: "auto", height: "100%" }}>
-//       {videos.map((v) => (
-//         <UnifiedVideoCard key={v.id} item={v} />
-//       ))}
-//     </div>
-//   );
-// };
-
-// import { useEffect, useRef } from "react";
-
-// export const VideoList = ({ videos }: { videos: UnifiedVideo[] }) => {
-//   const current = useCurrentVideoStore((s) => s.current);
-//   if (!current) {
-//     return;
-//   }
-//   const currentRef = useRef<HTMLDivElement | null>(null);
-
-//   useEffect(() => {
-//     if (currentRef.current) {
-//       currentRef.current.scrollIntoView({
-//         behavior: "auto",
-//         block: "center",
-//       });
-//     }
-//   }, [current]);
-
-//   return (
-//     <div style={{ overflowY: "auto", height: "100%" }}>
-//       {videos.map((v) => (
-//         <div key={v.id} ref={v.id === current.id ? currentRef : null}>
-//           <UnifiedVideoCard item={v} />
-//         </div>
-//       ))}
-//     </div>
-//   );
-// };
-
 import { useEffect, useRef } from "react";
+import type { VideoDataDTO } from "../components/videos/videoData";
+import VideoCard from "../components/videos/videoCard";
 
-export const VideoList = ({ videos }: { videos: UnifiedVideo[] }) => {
-  const current = useCurrentVideoStore((s) => s.current);
+export const VideoList = ({ videos }: { videos: VideoDataDTO[] }) => {
+  const current = useCurrentVideoDataStore((s) => s.current);
   if (!current) {
     return;
   }
@@ -171,11 +152,11 @@ export const VideoList = ({ videos }: { videos: UnifiedVideo[] }) => {
   return (
     <div style={{ overflowY: "auto", height: "100%" }}>
       {videos.map((v) => {
-        const isCurrent = v.id === current.id;
+        const isCurrent = v.videoId === current.videoId;
 
         return (
           <div
-            key={v.id}
+            key={v.videoId}
             ref={isCurrent ? currentRef : null}
             style={{
               background: isCurrent ? "#bcbcbc" : "transparent",
@@ -183,27 +164,10 @@ export const VideoList = ({ videos }: { videos: UnifiedVideo[] }) => {
               opacity: isCurrent ? 1 : 1,
             }}
           >
-            <UnifiedVideoCard item={v} />
+            <VideoCard item={v} />
           </div>
         );
       })}
     </div>
   );
 };
-
-// export const VideoList = ({ videos }: { videos: UnifiedVideo[] }) => {
-//   return (
-//     <div style={{ overflowY: "auto", height: "100%" }}>
-//       {videos.map((v) => (
-//         <div
-
-//           key={v.id}
-//           //onClick={() => onSelect(v)}
-//           style={{ padding: "8px", cursor: "pointer" }}
-//         >
-//           {v.title}
-//         </div>
-//       ))}
-//     </div>
-//   );
-// };
