@@ -1,4 +1,4 @@
-﻿using MyApi.CutomException;
+﻿using MyApi.DTOs;
 using MyApi.Interfaces;
 using MyApi.Models;
 using System.Text.Json;
@@ -55,23 +55,14 @@ public class TwitchStreamsCacheUpdater : BackgroundService
             _logger.LogInformation("\n{FailTime} Twitch キャッシュタイムアウト\n", failTime);
             return;
         }
-        catch(ApiServiceException ase)
-        {
-            var failTime = DateTime.Now;
-            _logger.LogInformation(
-                "\n{FailTime} {Message} {StatusCode}\n",
-                failTime,
-                ase.Message,
-                ase.StatusCode);
-            return;
-        }
+
         var json = JsonSerializer.Serialize(response);
 
         var cacheKey = CacheKeyHelper.GetCacheKey(CacheKeyHelper.VideoType.TwitchStream);
         await cache.SetStringAsync(
             cacheKey,
             json,
-            TimeSpan.FromMinutes(2)
+            TimeSpan.FromMinutes(10)
         );
 
         var finishTime = DateTime.Now;

@@ -1,7 +1,6 @@
 import type { VideoDataResponse } from "./videoData";
 import type { VideoDataDTO } from "./videoData";
-import type { VideoWithAnalysisResponse } from "./videoWithAnalysis";
-import type { VideoWithAnalysisDTO } from "./videoWithAnalysis";
+import type { VideoWithSummaryDTO, VideoWithSummaryResponse } from "./videoWithSummary";
 
 export const SearchVideoData = async (): Promise<VideoDataDTO[]> => {
     const url = "https://localhost:7138/api/videos";
@@ -15,7 +14,7 @@ export const SearchVideoData = async (): Promise<VideoDataDTO[]> => {
     return data.items;
 };
 
-export const SearchVideoWithAnalysis = async (): Promise<VideoWithAnalysisDTO[]> => {
+export const SearchVideoWithAnalysis = async (): Promise<VideoWithSummaryDTO[]> => {
     const url = "https://localhost:7138/api/videos/ai";
 
     const result = await fetch(url);
@@ -23,6 +22,6 @@ export const SearchVideoWithAnalysis = async (): Promise<VideoWithAnalysisDTO[]>
         throw new Error(`API error ${result.status}`);
     }
 
-    const data: VideoWithAnalysisResponse = await result.json();
+    const data: VideoWithSummaryResponse = await result.json();
     return data.items;
 }

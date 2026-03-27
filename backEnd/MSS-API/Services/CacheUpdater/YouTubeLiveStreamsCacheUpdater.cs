@@ -1,4 +1,4 @@
-﻿using MyApi.CutomException;
+﻿using MyApi.DTOs;
 using MyApi.Interfaces;
 using MyApi.Models;
 using System.Text.Json;
@@ -58,23 +58,14 @@ public class YouTubeLiveStreamsCacheUpdater : BackgroundService
             _logger.LogInformation("\n{FailTime} YouTube キャッシュタイムアウト\n", failTime);
             return;
         }
-        catch(ApiServiceException ase)
-        {
-            var failTime = DateTime.Now;
-            _logger.LogInformation(
-                "\n{FailTime} {Message} {StatusCode}\n",
-                failTime,
-                ase.Message,
-                ase.StatusCode);
-            return;
-        }
+
         var json = JsonSerializer.Serialize(response);
 
         var cacheKey = CacheKeyHelper.GetCacheKey(CacheKeyHelper.VideoType.YouTubeLiveStream);
         await cache.SetStringAsync(
             cacheKey,
             json,
-            TimeSpan.FromHours(1) // TTLは長め
+            TimeSpan.FromMinutes(65)
         );
 
         var finishTime = DateTime.Now;

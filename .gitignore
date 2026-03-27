@@ -60,3 +60,9 @@ coverage/
 # ============================
 .DS_Store
 Thumbs.db
+
+# docker
+docker-compose.yml
+
+# postgres
+postgres_data/

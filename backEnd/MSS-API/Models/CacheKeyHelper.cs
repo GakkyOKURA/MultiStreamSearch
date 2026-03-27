@@ -6,7 +6,7 @@ internal static class CacheKeyHelper
     {
         YouTubeLiveStream,
         TwitchStream,
-        GeminiAnakysis
+        AiSummary
     }
 
     internal static string GetCacheKey(VideoType type)
@@ -15,7 +15,7 @@ internal static class CacheKeyHelper
         {
             VideoType.YouTubeLiveStream => "youtubeLiveStream",
             VideoType.TwitchStream => "twitchStream",
-            VideoType.GeminiAnakysis => "geminiAnalysis",
+            VideoType.AiSummary => "aiSummary",
             _ => throw new NotImplementedException()
         };
     }

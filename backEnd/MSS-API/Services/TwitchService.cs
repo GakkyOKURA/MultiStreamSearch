@@ -1,28 +1,32 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using MyApi.Config;
-using MyApi.CutomException;
+using MyApi.DTOs;
 using MyApi.Interfaces;
 using MyApi.Models;
-using System.IO;
+using MyApi.Raws;
 using System.Text.Json;
 
 namespace MyApi.Services;
 
 public class TwitchService : ITwitchService
 {
-    private readonly RedisCacheService _cache;
+    private readonly IRedisCacheService _cache;
     private readonly HttpClient _httpClient;
     private readonly TwitchApiSettings _settings;
     private static string? _cachedToken;
     private static DateTime _tokenExpiresAt;
+    private readonly ILogger<TwitchService> _logger;
 
-
-    public TwitchService(RedisCacheService cache, HttpClient httpClient, IOptions<TwitchApiSettings> settings)
+    public TwitchService(
+        IRedisCacheService cache,
+        HttpClient httpClient,
+        IOptions<TwitchApiSettings> settings,
+        ILogger<TwitchService> logger)
     {
         _cache = cache;
         _httpClient = httpClient;
         _settings = settings.Value;
+        _logger = logger;
     }
 
     // アプリ用トークンを取得（Client Credentials Flow）
@@ -65,6 +69,7 @@ public class TwitchService : ITwitchService
     {
         var result = new VideoDataResponse();
         TwitchStreamPaginationRaw? oldPagination = null;
+        // 結果を 100 個取得できるまでループ
         // while が適切だが無限ループが怖いので for にしとく
         for (var i = 0; i < 5; i++)
         {
@@ -116,16 +121,11 @@ public class TwitchService : ITwitchService
             request.Headers.Add("Client-ID", _settings.ClientId);
             request.Headers.Add("Authorization", $"Bearer {token}");
 
-            var httpResponse = await _httpClient.SendAsync(request);
-            if (!httpResponse.IsSuccessStatusCode)
+            // 最大 20 回ループ。 許容範囲
+            var httpResponse = await GetHttpRequestWithRetryAsync(request, "get streams");
+            if(httpResponse is null)
             {
-                throw new ApiServiceException($"Get Stream リクエスト失敗", (int)httpResponse.StatusCode);
-            }
-
-            if (httpResponse.Headers.TryGetValues("Ratelimit-Remaining", out var values))
-            {
-                var remaining = values.FirstOrDefault();
-                Console.WriteLine($"残りのリクエスト回数: {remaining}");
+                continue;
             }
 
             var json = await httpResponse.Content.ReadAsStringAsync();
@@ -150,6 +150,7 @@ public class TwitchService : ITwitchService
 
             // data が 100 を超えた場合は cursor が残ってても break
             // cursor が無くなった = 最後まで検索された場合は break
+            // 重複でカウントが加算されるのはよくないので DistinctBy した後にカウントの確認
             if (data.Count >= 100 || string.IsNullOrEmpty(pagination.Cursor))
             {
                 break;
@@ -197,28 +198,59 @@ public class TwitchService : ITwitchService
             request.Headers.Add("Client-ID", _settings.ClientId);
             request.Headers.Add("Authorization", $"Bearer {token}");
 
-            var httpResponse = await _httpClient.SendAsync(request);
-            if (!httpResponse.IsSuccessStatusCode)
+            var httpResponse = await GetHttpRequestWithRetryAsync(request, "get users");
+            if(httpResponse is null)
             {
-                throw new ApiServiceException("Get Users リクエスト失敗", (int)httpResponse.StatusCode);
+                continue;
             }
 
             var json = await httpResponse.Content.ReadAsStringAsync();
             var userResponse = JsonSerializer.Deserialize<TwitchUserResponse>(json);
 
-            if (userResponse?.Data is not null)
+            if (userResponse is not null)
             {
                 allUsers.AddRange(userResponse.Data);
-            }
-
-            // レート制限のログ（必要なら）
-            if (httpResponse.Headers.TryGetValues("Ratelimit-Remaining", out var values))
-            {
-                Console.WriteLine($"Twitch API Remaining: {values.FirstOrDefault()}");
             }
         }
 
         return new TwitchUserResponse { Data = allUsers };
+    }
+
+    private async Task<HttpResponseMessage?> GetHttpRequestWithRetryAsync(
+        HttpRequestMessage request,
+        string requestMethodName)
+    {
+        var maxRetry = 3;
+        HttpResponseMessage? response = null;
+
+        for(var tryCount = 0; tryCount < maxRetry; tryCount++)
+        {
+            response = await _httpClient.SendAsync(request);
+            if (response.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
+            {
+                if(tryCount == maxRetry)
+                {
+                    ShowLog($"{requestMethodName} 503エラー。 これ以上 Retry 不可のため break");
+                    break;
+                }
+
+                // 最大で 2 + 4 + 8 = 14 秒待機
+                var delaySeconds = (int)Math.Pow(2, tryCount + 1);
+                ShowLog($"{requestMethodName} 503エラー。{delaySeconds}秒後にリトライ");
+
+                await Task.Delay(TimeSpan.FromSeconds(delaySeconds));
+                continue;
+            }
+
+            if (!response.IsSuccessStatusCode)
+            {
+                ShowLog($"{requestMethodName} {response.StatusCode}エラー。 リクエスト失敗");
+            }
+
+            break;
+        }
+
+        return response;
     }
 
     private VideoDataResponse ToDTO(List<TwitchStreamSearchRaw> sData, List<TwitchUserRaw> cData)
@@ -242,7 +274,7 @@ public class TwitchService : ITwitchService
                     ChannelId = s.UserLogin,//UserId,
                     ChannelName = s.UserName,
                     // Twitch の概要欄をセット
-                    SearchDescription = s.Title, // Twitchには動画単位の説明文がないのでタイトルを流用
+                    SearchDescription = string.Join(" ", s.Tags), // Twitchには動画単位の説明文がないのでタイトルを流用
                     ChannelDescription = u.Description,
 
                     // サムネイルURLの {width}x{height} を置換
@@ -273,5 +305,11 @@ public class TwitchService : ITwitchService
                     Platform = VIdeoPlatform.Twitch
                 }).ToList()
         };
+    }
+
+    private void ShowLog(string message)
+    {
+        var time = DateTime.Now;
+        _logger.LogInformation("\n{Time}{Message}\n", time, message);
     }
 }

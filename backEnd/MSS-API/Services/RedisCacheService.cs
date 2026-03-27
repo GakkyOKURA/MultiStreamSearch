@@ -1,8 +1,9 @@
 ﻿using StackExchange.Redis;
 using System.Text.Json;
+using MyApi.Interfaces;
 
 namespace MyApi.Services;
-public class RedisCacheService
+public class RedisCacheService : IRedisCacheService
 {
     private readonly IDatabase _db;
 
@@ -14,11 +15,6 @@ public class RedisCacheService
     public async Task SetStringAsync(string key, string value, TimeSpan? ttl = null)
     {
         await _db.StringSetAsync(key, value, ttl);
-    }
-
-    public async Task<string?> GetStringAsync(string key)
-    {
-        return await _db.StringGetAsync(key);
     }
 
     public async Task<T?> GetAsync<T>(string key)

@@ -1,173 +1,120 @@
 //共通の動画再生ページ
 import { useParams } from "react-router-dom";
+import { useVideoDataStore } from "../store/videoStore";
+import { Box, Flex, Image, Separator, Text } from "@chakra-ui/react";
 import {
-  useCurrentVideoDataStore,
-  useVideoDataStore,
-} from "../store/videoStore";
-import {
-  AspectRatio,
-  Box,
-  Flex,
-  Image,
-  Separator,
-  Text,
-} from "@chakra-ui/react";
+  VideoList,
+  VideoPlayer,
+} from "../components/videos/videoPageComponents";
+import { CommonHeader } from "../components/common/commonHeader";
+import { SearchVideoData } from "../components/videos/searchVideoData";
+import { useEffect, useState } from "react";
 
 const VideoPage = () => {
+  // 1. Hooks は関数のトップレベルで呼ぶ
   const { platform, id } = useParams();
+  const results = useVideoDataStore((s) => s.results);
+  const setResults = useVideoDataStore((s) => s.setResults);
+
+  // ローディング状態を管理するフラグ
+  const [isLoading, setIsLoading] = useState(false);
+
+  // videoStore が空の場合は useeffect で再レンダリング
+  useEffect(() => {
+    const fetchData = async () => {
+      // ストアが空の場合のみ、バックエンドから取得
+      if (results.length === 0) {
+        setIsLoading(true);
+        const data = await SearchVideoData();
+        setResults(data);
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [results.length, setResults]);
+
+  // 3. パラメータがない場合やローディング中の早期リターン
   if (!platform || !id) {
-    return;
+    return null;
   }
 
-  const videoDataResult = useVideoDataStore((s) => s.results);
-  const paramVideo = videoDataResult;
+  if (isLoading) {
+    return <div>ロード中...</div>;
+  }
 
-  const currentVideo = useCurrentVideoDataStore((s) => s.current);
+  // 4. 現在のビデオを特定する（results が更新されたら自動で再計算される）
+  const currentVideo =
+    platform === "youtubeLiveStream"
+      ? results.find((v) => v.videoId === id)
+      : results.find((v) => v.channelId === id);
+
   if (!currentVideo) {
-    return;
+    // データ取得後も見つからない場合
+    if (!isLoading && results.length > 0) {
+      return <div>Video not found.</div>;
+    }
+    return null;
   }
 
   return (
-    <Flex height="100vh">
-      {/* 左：プレイヤー */}
-      <Box flex="7" pl="40px" py="20px" pr="15px">
-        <VideoPlayer platform={platform} id={id} />
-
-        <Box mb="16px">
-          <Text fontSize="2xl" fontWeight="bold">
-            {currentVideo.videoTitle}
-          </Text>
-
-          <Flex>
-            <Image
-              src={currentVideo.channelHighThumbnail.url}
-              alt={currentVideo.channelName}
-              boxSize="80px"
-              borderRadius="full"
-              flexShrink={0} // ← アイコンが潰れないように
-            />
-            <Text
-              fontSize="medium"
-              marginTop="30px"
-              marginLeft="20px"
-              fontWeight="bold"
-            >
-              {currentVideo.channelName}
-            </Text>
-          </Flex>
-
-          <Separator my={3} borderColor="gray.500" borderWidth="1px" />
-
-          <Text fontSize="md">{currentVideo.channelDescription}</Text>
-        </Box>
-      </Box>
-      {/* 右：リスト */}
-      <Box
-        flex="3"
-        borderLeft="1px solid #444"
-        display={{ base: "none", md: "block" }}
+    <div>
+      <CommonHeader />
+      <Flex
+        height={{ base: "none", md: "100vh" }}
+        flexDirection={{ base: "column", md: "row" }}
+        overflow={"hidden"}
+        paddingTop={"60px"}
       >
-        <VideoList videos={paramVideo} />
-      </Box>
-    </Flex>
+        <Box
+          flex="7"
+          pl={{ base: "15px", md: "40px" }}
+          pr="15px"
+          overflowY="auto"
+        >
+          <VideoPlayer platform={platform} id={id} />
+          <Box mb="16px">
+            <Text fontSize="2xl" fontWeight="bold">
+              {currentVideo.videoTitle}
+            </Text>
+            <Flex>
+              <Image
+                src={currentVideo.channelHighThumbnail.url}
+                alt={currentVideo.channelName}
+                boxSize="80px"
+                borderRadius="full"
+                flexShrink={0}
+              />
+              <Text
+                fontSize="medium"
+                marginTop="30px"
+                marginLeft="20px"
+                fontWeight="bold"
+              >
+                {currentVideo.channelName}
+              </Text>
+            </Flex>
+            <Separator my={3} borderColor="gray.500" borderWidth="1px" />
+            <Text fontSize="md" whiteSpace={"pre-wrap"}>
+              {currentVideo.channelDescription}
+            </Text>
+          </Box>
+        </Box>
+
+        <Box
+          height={{ base: "300px", md: "100%" }}
+          alignSelf="center"
+          maxWidth={{ base: "80%", md: "none" }}
+          flex="3"
+          overflowY="auto"
+          minH={{ base: "700px", md: "auto" }}
+          maxH={{ base: "700px", md: "100%" }}
+        >
+          <VideoList videos={results} platform={platform} id={id} />
+        </Box>
+      </Flex>
+    </div>
   );
 };
 
 export default VideoPage;
-
-export const VideoPlayer = ({
-  platform,
-  id,
-}: {
-  platform: string;
-  id: string;
-}) => {
-  if (!platform || !id) {
-    return <div>Invalid video URL</div>;
-  }
-
-  if (platform === "youtubeLiveStream" || platform === "youtubeShort") {
-    return (
-      <AspectRatio ratio={16 / 9} width="100%">
-        <iframe
-          // width="80%"
-          // height="500"
-          src={`https://www.youtube.com/embed/${id}?autoplay=1&mute=0`}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; keyboard-map"
-          allowFullScreen
-        />
-      </AspectRatio>
-    );
-  }
-
-  if (platform === "twitchStream") {
-    return (
-      <AspectRatio ratio={16 / 9} width="100%">
-        <iframe
-          src={`https://player.twitch.tv/?channel=${id}&parent=localhost&autoplay=true&muted=false`}
-          // width="80%"
-          // height="60%"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; keyboard-map"
-          allowFullScreen
-        />
-      </AspectRatio>
-    );
-  }
-
-  if (platform === "twitchClip") {
-    return (
-      <AspectRatio ratio={16 / 9} width="100%">
-        <iframe
-          src={`https://clips.twitch.tv/embed?clip=${id}&parent=localhost&autoplay=true&muted=false`}
-          // width="100%"
-          // height="500"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; keyboard-map"
-          allowFullScreen
-        />
-      </AspectRatio>
-    );
-  }
-};
-
-import { useEffect, useRef } from "react";
-import type { VideoDataDTO } from "../components/videos/videoData";
-import VideoCard from "../components/videos/videoCard";
-
-export const VideoList = ({ videos }: { videos: VideoDataDTO[] }) => {
-  const current = useCurrentVideoDataStore((s) => s.current);
-  if (!current) {
-    return;
-  }
-  const currentRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (currentRef.current) {
-      currentRef.current.scrollIntoView({
-        behavior: "auto",
-        block: "center",
-      });
-    }
-  }, [current]);
-
-  return (
-    <div style={{ overflowY: "auto", height: "100%" }}>
-      {videos.map((v) => {
-        const isCurrent = v.videoId === current.videoId;
-
-        return (
-          <div
-            key={v.videoId}
-            ref={isCurrent ? currentRef : null}
-            style={{
-              background: isCurrent ? "#bcbcbc" : "transparent",
-              pointerEvents: isCurrent ? "none" : "auto",
-              opacity: isCurrent ? 1 : 1,
-            }}
-          >
-            <VideoCard item={v} />
-          </div>
-        );
-      })}
-    </div>
-  );
-};

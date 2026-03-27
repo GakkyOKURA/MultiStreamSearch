@@ -1,28 +1,33 @@
-﻿using Microsoft.AspNetCore.DataProtection.KeyManagement;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using MyApi.Config;
+using MyApi.DTOs;
 using MyApi.Interfaces;
 using MyApi.Models;
-using MyApi.Models.Channels;
-using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using MyApi.CutomException;
+using MyApi.Raws.Search;
+using MyApi.Raws.Channel;
 
 namespace MyApi.Services;
 
 public class YouTubeService : IYouTubeService
 {
-    private readonly RedisCacheService _cache;
+    private readonly IRedisCacheService _cache;
     private readonly HttpClient _httpClient;
     private readonly YouTubeApiSettings _settings;
-    
+    private readonly ILogger<YouTubeService> _logger;
 
-    public YouTubeService(RedisCacheService cache, HttpClient httpClient, IOptions<YouTubeApiSettings> settings)
+
+    public YouTubeService(
+        IRedisCacheService cache,
+        HttpClient httpClient,
+        IOptions<YouTubeApiSettings> settings,
+        ILogger<YouTubeService> logger)
     {
         _cache = cache;
         _httpClient = httpClient;
         _settings = settings.Value;
+        _logger = logger;
     }
 
     public async Task<VideoDataResponse> SearchYouTubeLiveStreamsAsync()
@@ -31,30 +36,14 @@ public class YouTubeService : IYouTubeService
         return await _cache.GetAsync<VideoDataResponse>(cacheKey) ?? new();
     }
 
-    //チャンネル名とタイトルどちらかに日本語が入っていれば日本語の動画判定とする
-    //クォータに余裕があれば search video で判定する
-    private List<YouTubeSearchItemRaw> SortJapaneseFirst(List<YouTubeSearchItemRaw> items)
-    {
-        return items
-            .OrderByDescending(v =>
-                HasJapanese(v.Snippet.Title) || HasJapanese(v.Snippet.ChannelTitle))
-            .ToList();
-    }
-
-    private static bool HasJapanese(string text)
-    {
-        if (string.IsNullOrEmpty(text)) return false;
-
-        // ひらがな・カタカナ・漢字
-        return Regex.IsMatch(text, @"[\u3040-\u30FF\u4E00-\u9FFF]");
-    }
+    
 
     public async Task<VideoDataResponse> FetchYouTubeLiveStreamsAsync()
     {
         var searchResponse = await GetYouTubeLiveStreamsAsync();
         if(searchResponse.Items.Count == 0)
         {
-            return new VideoDataResponse();
+            return new();
         }
 
         var channelResponse = await GetChannelInformationAsync(searchResponse.Items);
@@ -81,7 +70,8 @@ public class YouTubeService : IYouTubeService
             $"&key={_settings.ApiKey}";
 
         var nextPageToken = "";
-        var searchCount = 2; //今後 api 制限が緩和したら増やす
+        //今後 api 制限が緩和したら増やす
+        var searchCount = 2; 
         for (var i = 0; i < searchCount; i++)
         {
             var url = baseUrl;
@@ -91,25 +81,20 @@ public class YouTubeService : IYouTubeService
                 url += $"&pageToken={nextPageToken}";
             }
 
-            var httpResponse = await _httpClient.GetAsync(url);
-            if (!httpResponse.IsSuccessStatusCode)
+            var httpResponse = await GetHttpResponseMessageWithRetryAsync(url, "search list");
+            if(httpResponse is null)
             {
-                throw new ApiServiceException("Search.list リクエスト失敗", (int)httpResponse.StatusCode);
+                continue;
             }
 
             var json = await httpResponse.Content.ReadAsStringAsync();
             var response = JsonSerializer.Deserialize<YouTubeSearchResponse>(json);
             if (response is null)
             {
-                return new();
+                break;
             }
 
             allResponse.Items.AddRange(response.Items);
-            // 完全に重複を除く
-            allResponse.Items = allResponse.Items
-                .DistinctBy(v => v.Id.VideoId)
-                .DistinctBy(v => v.Id.ChannelId)
-                .ToList();
             if(string.IsNullOrEmpty(response.NextPageToken))
             {
                 break;
@@ -117,7 +102,24 @@ public class YouTubeService : IYouTubeService
             nextPageToken = response.NextPageToken;
         }
 
+        // 重複を除き、日本語配信に限定
+        allResponse.Items = allResponse.Items
+            .DistinctBy(v => v.Snippet.ChannelId)
+            .Where(v => HasJapanese(v.Snippet.Title)
+                     || HasJapanese(v.Snippet.ChannelTitle))
+            .ToList();
         return allResponse;
+    }
+
+    private static bool HasJapanese(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return false;
+        }
+
+        // ひらがな・カタカナ・漢字
+        return Regex.IsMatch(text, @"[\u3040-\u30FF\u4E00-\u9FFF]");
     }
 
     private async Task<YouTubeChannelsResponse> GetChannelInformationAsync(List<YouTubeSearchItemRaw> items)
@@ -139,22 +141,60 @@ public class YouTubeService : IYouTubeService
                 $"&id={ids}" +
                 $"&key={_settings.ApiKey}";
 
-            var httpResponse = await _httpClient.GetAsync(url);
-            if (!httpResponse.IsSuccessStatusCode)
+            var httpResponse = await GetHttpResponseMessageWithRetryAsync(url, "channels list");
+            if(httpResponse is null)
             {
-                throw new ApiServiceException($"Channels.list リクエスト失敗", (int)httpResponse.StatusCode);
+                continue;
             }
 
             var json = await httpResponse.Content.ReadAsStringAsync();
             var result = JsonSerializer.Deserialize<YouTubeChannelsResponse>(json);
 
-            if (result?.Items is not null)
+            if (result is not null)
             {
                 allResults.Items.AddRange(result.Items);
             }
         }
 
         return allResults;
+    }
+
+    private async Task<HttpResponseMessage?> GetHttpResponseMessageWithRetryAsync(string url, string requestMethodName)
+    {
+        var maxRetry = 3;
+        HttpResponseMessage? response = null;
+
+        // 「初回 + 最大3回のリトライ」＝ 最大4回試行
+        for (var tryCount = 0; tryCount <= maxRetry; tryCount++)
+        {
+            response = await _httpClient.GetAsync(url);
+
+            // 503 かつ リトライ可能回数が残っている場合のみ待機
+            if (response.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
+            {
+                if(tryCount == maxRetry)
+                {
+                    ShowLog($"{requestMethodName} 503エラー。 これ以上 Retry 不可のため break");
+                    break;
+                }
+
+                // 最大で 2 + 4 + 8 = 14 秒待機
+                var delaySeconds = (int)Math.Pow(2, tryCount + 1);
+                ShowLog($"{requestMethodName} 503エラー。{delaySeconds}秒後にリトライ");
+
+                await Task.Delay(TimeSpan.FromSeconds(delaySeconds));
+                continue;
+            }
+
+            if(!response.IsSuccessStatusCode)
+            {
+                ShowLog($"{requestMethodName} {response.StatusCode}エラー。 リクエスト失敗");
+            }
+
+            break;
+        }
+
+        return response;
     }
 
     private VideoDataResponse ToDTO(List<YouTubeSearchItemRaw> sItems, List<YouTubeChannelItemRaw> cItems)
@@ -203,6 +243,12 @@ public class YouTubeService : IYouTubeService
                 )
                 .ToList()
         };
+    }
+
+    private void ShowLog(string message)
+    {
+        var time = DateTime.Now;
+        _logger.LogInformation("\n{Time}{Message}\n", time, message);
     }
 }
 

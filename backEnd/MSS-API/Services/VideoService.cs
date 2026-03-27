@@ -1,5 +1,5 @@
-﻿using MyApi.Interfaces;
-using MyApi.Models;
+﻿using MyApi.DTOs;
+using MyApi.Interfaces;
 
 namespace MyApi.Services;
 
@@ -7,15 +7,15 @@ public class VideoService : IVideoService
 {
     private readonly IYouTubeService _youTubeService;
     private readonly ITwitchService _twitchService;
-    private readonly IGeminiService _geminiService;
+    private readonly IAiService _aiService;
     public VideoService(
         IYouTubeService youTubeService,
         ITwitchService twitchService,
-        IGeminiService geminiService)
+        IAiService aiService)
     {
         _youTubeService = youTubeService;
         _twitchService = twitchService;
-        _geminiService = geminiService;
+        _aiService = aiService;
     }
 
     public async Task<VideoDataResponse> SearchVideoAsync()
@@ -47,20 +47,20 @@ public class VideoService : IVideoService
         };
     }
 
-    public async Task<VideoWithAnalysisResponse> SearchVideoWithAnalysisAsync()
+    public async Task<VideoWithSummaryResponse> SearchVideoWithAnalysisAsync()
     {
-        var geminiResponse = await _geminiService.SearchVtuberAnalysis();
+        var geminiResponse = await _aiService.SearchVtuberAnalysis();
 
         var videoResponses = await GetVideoResponses();
         var combinedList = videoResponses.ytResponse.Items.Concat(videoResponses.twResponse.Items).ToList();
         var videoDataDict = combinedList.ToDictionary(v => v.ChannelId);
-        var result = new VideoWithAnalysisResponse();
+        var result = new VideoWithSummaryResponse();
 
         foreach (var analysis in geminiResponse.Analyses)
         {
             if (videoDataDict.TryGetValue(analysis.Id, out var data))
             {
-                result.Items.Add(new VideoWithAnalysisDTO
+                result.Items.Add(new VideoWithSummaryDTO
                 {
                     VideoId = data.VideoId,
                     VideoTitle = data.VideoTitle,

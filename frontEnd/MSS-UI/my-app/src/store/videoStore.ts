@@ -1,7 +1,7 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 import type { VideoDataDTO } from "../components/videos/videoData";
-import type { VideoWithAnalysisDTO } from "../components/videos/videoWithAnalysis";
+import type { VideoWithSummaryDTO } from "../components/videos/videoWithSummary";
 
 type VideoDataStore = {
   results: VideoDataDTO[];
@@ -16,18 +16,7 @@ export const useVideoDataStore = create<VideoDataStore>()(
     }),
     {
       name: "videoDataResults",
-      storage: {
-        getItem: (name) => {
-          const value = sessionStorage.getItem(name);
-          return value ? JSON.parse(value) : null;
-        },
-        setItem: (name, value) => {
-          sessionStorage.setItem(name, JSON.stringify(value));
-        },
-        removeItem: (name) => {
-          sessionStorage.removeItem(name);
-        },
-      },
+      storage: createJSONStorage(() => sessionStorage),
     }
   )
 );
@@ -45,25 +34,14 @@ export const useCurrentVideoDataStore = create<CurrentVideoStore>()(
     }),
     {
       name: "currentVideoData",
-      storage: {
-        getItem: (name) => {
-          const value = sessionStorage.getItem(name);
-          return value ? JSON.parse(value) : null;
-        },
-        setItem: (name, value) => {
-          sessionStorage.setItem(name, JSON.stringify(value));
-        },
-        removeItem: (name) => {
-          sessionStorage.removeItem(name);
-        },
-      },
+      storage: createJSONStorage(() => sessionStorage),
     }
   )
 );
 
 type VideoWithAnalysisStore = {
-  results: VideoWithAnalysisDTO[];
-  setResults: (videos: VideoWithAnalysisDTO[]) => void;
+  results: VideoWithSummaryDTO[];
+  setResults: (videos: VideoWithSummaryDTO[]) => void;
 };
 
 export const useVideoWithAnalysisStore = create<VideoWithAnalysisStore>()(
@@ -74,25 +52,14 @@ export const useVideoWithAnalysisStore = create<VideoWithAnalysisStore>()(
     }),
     {
       name: "videoWithAnalysisResults",
-      storage: {
-        getItem: (name) => {
-          const value = sessionStorage.getItem(name);
-          return value ? JSON.parse(value) : null;
-        },
-        setItem: (name, value) => {
-          sessionStorage.setItem(name, JSON.stringify(value));
-        },
-        removeItem: (name) => {
-          sessionStorage.removeItem(name);
-        },
-      },
+      storage: createJSONStorage(() => sessionStorage),
     }
   )
 );
 
 type CurrentVideoWithAnalysisStore = {
-  current: VideoWithAnalysisDTO | null;
-  setCurrent: (video: VideoWithAnalysisDTO | null) => void;
+  current: VideoWithSummaryDTO | null;
+  setCurrent: (video: VideoWithSummaryDTO | null) => void;
 };
 
 export const useCurrentVideoWithAnalysisStore = create<CurrentVideoWithAnalysisStore>()(
@@ -103,18 +70,26 @@ export const useCurrentVideoWithAnalysisStore = create<CurrentVideoWithAnalysisS
     }),
     {
       name: "currentVideoWithAnalysis",
-      storage: {
-        getItem: (name) => {
-          const value = sessionStorage.getItem(name);
-          return value ? JSON.parse(value) : null;
-        },
-        setItem: (name, value) => {
-          sessionStorage.setItem(name, JSON.stringify(value));
-        },
-        removeItem: (name) => {
-          sessionStorage.removeItem(name);
-        },
-      },
+      storage: createJSONStorage(() => sessionStorage),
+    }
+  )
+);
+
+type NeedReloadStore = {
+  isReloadNeeded: boolean;
+  setIsReloadNeeded: (isNeeded: boolean) => void;
+};
+
+export const useNeedReloadStore = create<NeedReloadStore>()(
+  persist(
+    (set) => ({
+      isReloadNeeded: true, // ストレージに何もない時はこれが使われる
+      setIsReloadNeeded: (needed) => set({ isReloadNeeded:needed }),
+    }),
+    {
+      name: "need-reload-storage",
+      // これだけで getItem/setItem/removeItem を安全に実装してくれます
+      storage: createJSONStorage(() => sessionStorage),
     }
   )
 );

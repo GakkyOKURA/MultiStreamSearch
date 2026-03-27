@@ -1,11 +1,9 @@
 using MyApi.Config;
 using MyApi.Endpoints;
 using MyApi.Interfaces;
-using MyApi.Models;
 using MyApi.Services;
 using MyApi.Services.CacheUpdater;
 using StackExchange.Redis;
-using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,8 +28,8 @@ builder.Services.Configure<YouTubeApiSettings>(
     builder.Configuration.GetSection("YouTubeApi"));
 builder.Services.Configure<TwitchApiSettings>(
     builder.Configuration.GetSection("TwitchApi"));
-builder.Services.Configure<GeminiApiSettings>(
-    builder.Configuration.GetSection("GeminiApi"));
+builder.Services.Configure<AiApiSettings>(
+    builder.Configuration.GetSection("AiApi"));
 
 // Redis を追加
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
@@ -40,28 +38,39 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
     return ConnectionMultiplexer.Connect(config!);
 });
 
-builder.Services.AddSingleton<RedisCacheService>();
+builder.Services.AddSingleton<IRedisCacheService, RedisCacheService>();
+
+builder.Services.AddSingleton(sp =>
+{
+    var config = builder.Configuration.GetConnectionString("PostgreSQL");
+    return new VtuberRepository(config!);
+});
 
 
-builder.Services.AddHttpClient<IYouTubeService, YouTubeService>();
-builder.Services.AddHttpClient<ITwitchService, TwitchService>();
-builder.Services.AddHttpClient<IGeminiService, GeminiService>();
-builder.Services.AddScoped<IVideoService, VideoService>();
+//builder.Services.AddHttpClient<IYouTubeService, YouTubeService>();
+//builder.Services.AddHttpClient<ITwitchService, TwitchService>();
+//builder.Services.AddHttpClient<IAiService, AiSummaryService>();
+//builder.Services.AddScoped<IVideoService, VideoService>();
 
-// YouTube のキャッシュ更新サービスを追加
-builder.Services.AddHostedService<YouTubeLiveStreamsCacheUpdater>();
-// Twitch のキャッシュ更新サービスを追加
-builder.Services.AddHostedService<TwitchStreamsCacheUpdater>();
-// Gemini のキャッシュ更新サービスを追加
-builder.Services.AddHostedService<GeminiCacheUpdater>();
+//// YouTube のキャッシュ更新サービスを追加
+//builder.Services.AddHostedService<YouTubeLiveStreamsCacheUpdater>();
+//// Twitch のキャッシュ更新サービスを追加
+//builder.Services.AddHostedService<TwitchStreamsCacheUpdater>();
+//// Gemini のキャッシュ更新サービスを追加
+//builder.Services.AddHostedService<AiSummaryCacheUpdater>();
 
 var app = builder.Build();
+
+using var scope = app.Services.CreateScope();
+var repo = scope.ServiceProvider.GetRequiredService<VtuberRepository>();
+await repo.InitializeDatabaseAsync();
 
 // CORS を有効化（UseHttpsRedirection の前）
 app.UseCors();
 app.UseHttpsRedirection();
 
 // エンドポイント登録
-app.MapVideoEndpoints();
+//app.MapVideoEndpoints();
+app.MapVtuberEndpoints();
 
 app.Run();
