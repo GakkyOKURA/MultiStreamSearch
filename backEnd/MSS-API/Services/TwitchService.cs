@@ -13,8 +13,6 @@ public class TwitchService : ITwitchService
     private readonly IRedisCacheService _cache;
     private readonly HttpClient _httpClient;
     private readonly TwitchApiSettings _settings;
-    private static string? _cachedToken;
-    private static DateTime _tokenExpiresAt;
     private readonly ILogger<TwitchService> _logger;
 
     public TwitchService(
@@ -33,9 +31,9 @@ public class TwitchService : ITwitchService
     private async Task<string> GetAccessTokenAsync()
     {
         // 有効なトークンがあれば再利用
-        if (_cachedToken != null && DateTime.UtcNow < _tokenExpiresAt)
+        if (await _cache.GetStringAsync(CacheKeyHelper.GetTwitchTokenCacheKey()) is string existingToken)
         {
-            return _cachedToken;
+            return existingToken;
         }
 
         var url =
@@ -44,24 +42,32 @@ public class TwitchService : ITwitchService
             $"&client_secret={_settings.ClientSecret}" +
             "&grant_type=client_credentials";
 
-        var res = await _httpClient.PostAsync(url, null);
+        using var res = await _httpClient.PostAsync(url, null);
         var json = await res.Content.ReadAsStringAsync();
 
         var doc = JsonDocument.Parse(json).RootElement;
 
-        _cachedToken = doc.GetProperty("access_token").GetString();
-        var expiresIn = doc.GetProperty("expires_in").GetInt32(); // 秒数
+        var token = doc.GetProperty("access_token").GetString();
+        var expiresIn = doc.GetProperty("expires_in").GetInt32(); // 何秒で token が切れるかを把握
+
+        if (token is null)
+        {
+            return "";
+        }
 
         // ★ 有効期限を保存（現在時刻 + expires_in）
-        _tokenExpiresAt = DateTime.UtcNow.AddSeconds(expiresIn - 60);
         // -60(秒)は余裕を持たせるため
+        var tokenExpiresAt = DateTime.UtcNow.AddSeconds(expiresIn - 60);
+        var ttl = tokenExpiresAt - DateTime.UtcNow;
 
-        return _cachedToken!;
+        await _cache.SetStringAsync(CacheKeyHelper.GetTwitchTokenCacheKey(), token, ttl);
+
+        return token;
     }
 
     public async Task<VideoDataResponse> SearchTwitchStreamsAsync()
     {
-        var cacheKey = CacheKeyHelper.GetCacheKey(CacheKeyHelper.VideoType.TwitchStream);
+        var cacheKey = CacheKeyHelper.GetCacheKey(VideoType.TwitchStream);
         return await _cache.GetAsync<VideoDataResponse>(cacheKey) ?? new();
     }
 
@@ -73,18 +79,20 @@ public class TwitchService : ITwitchService
         // while が適切だが無限ループが怖いので for にしとく
         for (var i = 0; i < 5; i++)
         {
+            // まずは配信を取得
             var streamResponse = await GetVtuberTwitchStreamsAsync(oldPagination);
-            
+            // pagination を更新
             oldPagination = streamResponse.Pagination;
 
+            // 次にチャンネル情報を取得
             var channelResponse = await GetChannelInformationAsync(streamResponse.Data);
-            var dto = ToDTO(streamResponse.Data, channelResponse.Data);
-            var individual = dto.Items
-                .Where(v => !IndividualChecker.IsCompany(v.ChannelDescription))
-                .ToList();
 
-            result.Items.AddRange(individual);
-            if(result.Items.Count >= 100 || string.IsNullOrEmpty(oldPagination.Cursor))
+            // dto の形に整形
+            var dto = ToDTO(streamResponse.Data, channelResponse.Data);
+
+            result.Items.AddRange(dto.Items);
+            // 100 個取得できた or pagination が切れたら beak
+            if (result.Items.Count >= 100 || string.IsNullOrEmpty(oldPagination.Cursor))
             {
                 result.Items = result.Items
                     .Take(100)
@@ -117,43 +125,50 @@ public class TwitchService : ITwitchService
                 url += $"&after={pagination.Cursor}";
             }
 
-            var request = new HttpRequestMessage(HttpMethod.Get, url);
-            request.Headers.Add("Client-ID", _settings.ClientId);
-            request.Headers.Add("Authorization", $"Bearer {token}");
-
             // 最大 20 回ループ。 許容範囲
-            var httpResponse = await GetHttpRequestWithRetryAsync(request, "get streams");
-            if(httpResponse is null)
+            var (httpResponse, msg) = await GetHttpResponseWithRetryAsync(url, token, "get streams");
+            if (httpResponse is null)
             {
+                ShowLog(msg);
                 continue;
             }
 
-            var json = await httpResponse.Content.ReadAsStringAsync();
-
-            // TwitchClipSearchResponse 型に変換
-            var response = JsonSerializer.Deserialize<TwitchStreamSearchResponse>(json);
-            if (response is null)
+            using (httpResponse)
             {
-                return new();
-            }
+                var json = await httpResponse.Content.ReadAsStringAsync();
 
-            pagination = response.Pagination;
+                // TwitchClipSearchResponse 型に変換
+                var searchResponse = JsonSerializer.Deserialize<TwitchStreamSearchResponse>(json);
+                if (searchResponse is null)
+                {
+                    return new();
+                }
 
-            var vtuberStream = FilterVtuberStream(response);
-            data.AddRange(vtuberStream);
+                pagination = searchResponse.Pagination;
 
-            //Twitch API の仕様上、 page1 の末尾と page2 の先頭に
-            //同じ動画が入ることがある。それを防ぐ。
-            data = data
-                .DistinctBy(v => v.Id)
-                .ToList();
+                // vtuber かどうかのフィルタリング
+                var vtuberStream = FilterVtuberStream(searchResponse);
 
-            // data が 100 を超えた場合は cursor が残ってても break
-            // cursor が無くなった = 最後まで検索された場合は break
-            // 重複でカウントが加算されるのはよくないので DistinctBy した後にカウントの確認
-            if (data.Count >= 100 || string.IsNullOrEmpty(pagination.Cursor))
-            {
-                break;
+                // さらに企業勢をはじく
+                var filter = await _cache.GetVtuberFilterListAsync(CacheKeyHelper.GetVtuberCachKey(VIdeoPlatform.Twitch));
+                var filteredStream = vtuberStream
+                    .Where(v => !filter.Contains(v.UserId));
+
+                data.AddRange(filteredStream);
+
+                //Twitch API の仕様上、 page1 の末尾と page2 の先頭に
+                //同じ動画が入ることがある。それを防ぐ。
+                data = data
+                    .DistinctBy(v => v.Id)
+                    .ToList();
+
+                // data が 100 を超えた場合は cursor が残ってても break
+                // cursor が無くなった = 最後まで検索された場合は break
+                // 重複でカウントが加算されるのはよくないので DistinctBy した後にカウントの確認
+                if (data.Count >= 100 || string.IsNullOrEmpty(pagination.Cursor))
+                {
+                    break;
+                }
             }
         }
 
@@ -164,7 +179,12 @@ public class TwitchService : ITwitchService
         };
     }
 
-    private List<TwitchStreamSearchRaw> FilterVtuberStream(TwitchStreamSearchResponse response )
+    /// <summary>
+    /// Tag に "Vtuber" が存在する配信のみを取得
+    /// </summary>
+    /// <param name="response"></param>
+    /// <returns></returns>
+    private List<TwitchStreamSearchRaw> FilterVtuberStream(TwitchStreamSearchResponse response)
     {
         return response.Data
             .Where(v => v.Tags is not null)
@@ -194,68 +214,90 @@ public class TwitchService : ITwitchService
             var idQuery = string.Join("&id=", chunk.Select(s => s.UserId));
             var url = $"https://api.twitch.tv/helix/users?id={idQuery}";
 
-            var request = new HttpRequestMessage(HttpMethod.Get, url);
-            request.Headers.Add("Client-ID", _settings.ClientId);
-            request.Headers.Add("Authorization", $"Bearer {token}");
-
-            var httpResponse = await GetHttpRequestWithRetryAsync(request, "get users");
-            if(httpResponse is null)
+            var (httpResponse, msg) = await GetHttpResponseWithRetryAsync(url, token, "get users");
+            if (httpResponse is null)
             {
+                ShowLog(msg);
                 continue;
             }
 
-            var json = await httpResponse.Content.ReadAsStringAsync();
-            var userResponse = JsonSerializer.Deserialize<TwitchUserResponse>(json);
-
-            if (userResponse is not null)
+            using (httpResponse)
             {
-                allUsers.AddRange(userResponse.Data);
+
+                var json = await httpResponse.Content.ReadAsStringAsync();
+                var userResponse = JsonSerializer.Deserialize<TwitchUserResponse>(json);
+
+                if (userResponse is not null)
+                {
+                    allUsers.AddRange(userResponse.Data);
+                }
             }
         }
 
         return new TwitchUserResponse { Data = allUsers };
     }
 
-    private async Task<HttpResponseMessage?> GetHttpRequestWithRetryAsync(
-        HttpRequestMessage request,
+    /// <summary>
+    /// リトライを含めリクエストを送る
+    /// 目的は 503 対策
+    /// </summary>
+    /// <param name="request"></param>
+    /// <param name="requestMethodName"></param>
+    /// <returns></returns>
+    private async Task<(HttpResponseMessage? response, string errorMsg)> GetHttpResponseWithRetryAsync(
+        string url,
+        string token,
         string requestMethodName)
     {
         var maxRetry = 3;
-        HttpResponseMessage? response = null;
 
-        for(var tryCount = 0; tryCount < maxRetry; tryCount++)
+        for (var tryCount = 0; tryCount <= maxRetry; tryCount++)
         {
-            response = await _httpClient.SendAsync(request);
-            if (response.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
+            using var request = CreateHttpRequestWithHeader(url, token);
+            var response = await _httpClient.SendAsync(request);
+
+            // 成功した場合は即 return
+            if (response.IsSuccessStatusCode)
             {
-                if(tryCount == maxRetry)
+                return (response, "");
+            }
+
+            // 失敗の場合は response を dispose
+            using (response)
+            {
+                // 503 の場合は数秒待機して continue
+                if (response.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
                 {
-                    ShowLog($"{requestMethodName} 503エラー。 これ以上 Retry 不可のため break");
-                    break;
+                    if (tryCount != maxRetry)
+                    {
+                        // 最大で 2 + 4 + 8 = 14 秒待機
+                        var delaySeconds = (int)Math.Pow(2, tryCount + 1);
+                        await Task.Delay(TimeSpan.FromSeconds(delaySeconds));
+                        continue;
+                    }
                 }
-
-                // 最大で 2 + 4 + 8 = 14 秒待機
-                var delaySeconds = (int)Math.Pow(2, tryCount + 1);
-                ShowLog($"{requestMethodName} 503エラー。{delaySeconds}秒後にリトライ");
-
-                await Task.Delay(TimeSpan.FromSeconds(delaySeconds));
-                continue;
+                // その他のエラーは即 return
+                else if (!response.IsSuccessStatusCode)
+                {
+                    return (null, $"{requestMethodName} {response.StatusCode}エラー。");
+                }
             }
-
-            if (!response.IsSuccessStatusCode)
-            {
-                ShowLog($"{requestMethodName} {response.StatusCode}エラー。 リクエスト失敗");
-            }
-
-            break;
         }
 
-        return response;
+        return (null, $"{requestMethodName} 503エラー。");
+    }
+
+    private HttpRequestMessage CreateHttpRequestWithHeader(string url, string token)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.Headers.Add("Client-ID", _settings.ClientId);
+        request.Headers.Add("Authorization", $"Bearer {token}");
+        return request;
     }
 
     private VideoDataResponse ToDTO(List<TwitchStreamSearchRaw> sData, List<TwitchUserRaw> cData)
     {
-        if(sData.Count == 0 || cData.Count == 0)
+        if (sData.Count == 0 || cData.Count == 0)
         {
             return new VideoDataResponse();
         }

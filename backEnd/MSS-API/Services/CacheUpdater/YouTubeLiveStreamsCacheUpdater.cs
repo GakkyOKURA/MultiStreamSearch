@@ -9,6 +9,7 @@ public class YouTubeLiveStreamsCacheUpdater : BackgroundService
 {
     private readonly ILogger<YouTubeLiveStreamsCacheUpdater> _logger;
     private readonly IServiceProvider _provider;
+    internal static bool FirstUpdateDone { get; set; }
 
     public YouTubeLiveStreamsCacheUpdater(
         ILogger<YouTubeLiveStreamsCacheUpdater> logger,
@@ -22,9 +23,6 @@ public class YouTubeLiveStreamsCacheUpdater : BackgroundService
     // アプリ起動時に自動で実行される
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // 起動時にまず更新
-        await UpdateCache(stoppingToken);
-
         // この中を無限ループ
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -42,30 +40,45 @@ public class YouTubeLiveStreamsCacheUpdater : BackgroundService
         using var scope = _provider.CreateScope();
 
         var youTubeService = scope.ServiceProvider.GetRequiredService<IYouTubeService>();
-        var cache = scope.ServiceProvider.GetRequiredService<RedisCacheService>();
+        var cache = scope.ServiceProvider.GetRequiredService<IRedisCacheService>();
 
         var startTime = DateTime.Now;
-        _logger.LogInformation("\n{StartTime} YouTube キャッシュ更新開始…\n", startTime);
+        _logger.LogInformation("\n{StartTime} YouTube キャッシュ更新開始\n", startTime);
 
         VideoDataResponse? response = null;
         try
         {
             response = await youTubeService.FetchYouTubeLiveStreamsAsync();
         }
-        catch(OperationCanceledException)
+        catch (OperationCanceledException)
         {
             var failTime = DateTime.Now;
-            _logger.LogInformation("\n{FailTime} YouTube キャッシュタイムアウト\n", failTime);
+            _logger.LogInformation("\n{FailTime} YouTube キャッシュ更新タイムアウト\n", failTime);
+            return;
+        }
+        catch (Exception ex)
+        {
+            var failTime = DateTime.Now;
+            var message = ex.Message;
+            _logger.LogInformation("\n{FailTime} YouTube キャッシュ更新エラー {Message} \n", failTime, message);
+            return;
+        }
+
+        // 結果が 0 件の場合は return
+        if (response.Items.Count == 0)
+        {
+            var noItemsFinishTime = DateTime.Now;
+            _logger.LogInformation("\n{FinishTime} YouTube response  0 件のためキャッシュ更新せず\n", noItemsFinishTime);
             return;
         }
 
         var json = JsonSerializer.Serialize(response);
 
-        var cacheKey = CacheKeyHelper.GetCacheKey(CacheKeyHelper.VideoType.YouTubeLiveStream);
+        var cacheKey = CacheKeyHelper.GetCacheKey(VideoType.YouTubeLiveStream);
         await cache.SetStringAsync(
             cacheKey,
             json,
-            TimeSpan.FromMinutes(65)
+            TimeSpan.FromDays(1) // 最大で 1 日は保存しておく
         );
 
         var finishTime = DateTime.Now;
@@ -91,4 +104,3 @@ public class YouTubeLiveStreamsCacheUpdater : BackgroundService
         return next - now;
     }
 }
-

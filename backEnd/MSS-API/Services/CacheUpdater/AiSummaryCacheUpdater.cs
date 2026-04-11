@@ -19,11 +19,6 @@ public class AiSummaryCacheUpdater : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // youtube と twitch のデータ収集が終わってからでないと意味がないので
-        //最初は 2 分待機
-        await Task.Delay(TimeSpan.FromMinutes(2));
-        await UpdateCache(stoppingToken);
-
         // この中を無限ループ
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -39,30 +34,44 @@ public class AiSummaryCacheUpdater : BackgroundService
         using var scope = _provider.CreateScope();
 
         var geminiService = scope.ServiceProvider.GetRequiredService<IAiService>();
-        var cache = scope.ServiceProvider.GetRequiredService<RedisCacheService>();
+        var cache = scope.ServiceProvider.GetRequiredService<IRedisCacheService>();
 
         var startTime = DateTime.Now;
-        _logger.LogInformation("\n{StartTime} AiSummary キャッシュ更新開始...\n", startTime);
+        _logger.LogInformation("\n{StartTime} AiSummary キャッシュ更新開始\n", startTime);
 
         ChannelSummaryResponse? response = null;
         try
         {
             response = await geminiService.FetchVtuberAnalysis();
         }
-        catch(OperationCanceledException)
+        catch (OperationCanceledException)
         {
             var failTime = DateTime.Now;
-            _logger.LogInformation("\n{FailTime} AiSummary キャッシュタイムアウト\n", failTime);
+            _logger.LogInformation("\n{FailTime} AiSummary キャッシュ更新タイムアウト\n", failTime);
+            return;
+        }
+        catch (Exception ex)
+        {
+            var failTime = DateTime.Now;
+            var message = ex.Message;
+            _logger.LogInformation("\n{FailTime} AiSummary キャッシュ更新エラー {Message} \n", failTime, message);
+            return;
+        }
+
+        if (response.Analyses.Count == 0)
+        {
+            var noItemsFinishTime = DateTime.Now;
+            _logger.LogInformation("\n{FinishTime} Aisummary response 0 件のためキャッシュ更新せず\n", noItemsFinishTime);
             return;
         }
 
         var json = JsonSerializer.Serialize(response);
 
-        var cacheKey = CacheKeyHelper.GetCacheKey(CacheKeyHelper.VideoType.AiSummary);
+        var cacheKey = CacheKeyHelper.GetCacheKey(VideoType.AiSummary);
         await cache.SetStringAsync(
             cacheKey,
             json,
-            TimeSpan.FromMinutes(65)
+            TimeSpan.FromDays(1) // 最大で 1 日は保存
         );
 
         var finishTime = DateTime.Now;

@@ -9,20 +9,18 @@ public class TwitchStreamsCacheUpdater : BackgroundService
 {
     private readonly ILogger<TwitchStreamsCacheUpdater> _logger;
     private readonly IServiceProvider _provider;
+    internal static bool FirstUpdateDone { get; set; }
 
     public TwitchStreamsCacheUpdater(
         ILogger<TwitchStreamsCacheUpdater> logger,
-        IServiceProvider provider )
+        IServiceProvider provider)
     {
-        _logger = logger; 
+        _logger = logger;
         _provider = provider;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // 起動時にまず更新
-        await UpdateCache(stoppingToken);
-
         // この中を無限ループ
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -38,11 +36,11 @@ public class TwitchStreamsCacheUpdater : BackgroundService
         using var scope = _provider.CreateScope();
 
         var twitchService = scope.ServiceProvider.GetRequiredService<ITwitchService>();
-        var cache = scope.ServiceProvider.GetRequiredService<RedisCacheService>();
+        var cache = scope.ServiceProvider.GetRequiredService<IRedisCacheService>();
 
         var startTime = DateTime.Now;
         // CA2254 対策
-        _logger.LogInformation("\n{StartTime} Twitch キャッシュ更新開始...\n", startTime);
+        _logger.LogInformation("\n{StartTime} Twitch キャッシュ更新開始\n", startTime);
 
         VideoDataResponse? response = null;
         try
@@ -52,17 +50,31 @@ public class TwitchStreamsCacheUpdater : BackgroundService
         catch (OperationCanceledException)
         {
             var failTime = DateTime.Now;
-            _logger.LogInformation("\n{FailTime} Twitch キャッシュタイムアウト\n", failTime);
+            _logger.LogInformation("\n{FailTime} Twitch キャッシュ更新タイムアウト\n", failTime);
+            return;
+        }
+        catch(Exception ex)
+        {
+            var failTime = DateTime.Now;
+            var message = ex.Message;
+            _logger.LogInformation("\n{FailTime} Twitch キャッシュ更新エラー {Message} \n", failTime, message);
+            return;
+        }
+
+        if(response.Items.Count == 0)
+        {
+            var noItemsFinishTime = DateTime.Now;
+            _logger.LogInformation("\n{FinishTime} Twitch response 0 件のためキャッシュ更新せず\n", noItemsFinishTime);
             return;
         }
 
         var json = JsonSerializer.Serialize(response);
 
-        var cacheKey = CacheKeyHelper.GetCacheKey(CacheKeyHelper.VideoType.TwitchStream);
+        var cacheKey = CacheKeyHelper.GetCacheKey(VideoType.TwitchStream);
         await cache.SetStringAsync(
             cacheKey,
             json,
-            TimeSpan.FromMinutes(10)
+            TimeSpan.FromDays(1) // 最大で 1 日は保存しておく
         );
 
         var finishTime = DateTime.Now;

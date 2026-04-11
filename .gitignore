@@ -33,8 +33,9 @@ obj/
 
 # appsettings (keep only base config)
 appsettings.Development.json
+appsettings.Docker.json
 appsettings.*.json
-appsettings.json
+!appsettings.json
 
 # Static files (if backend hosts frontend)
 wwwroot/

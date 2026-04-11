@@ -1,4 +1,5 @@
-﻿using MyApi.Models;
+﻿using MyApi.Interfaces;
+using MyApi.Models;
 using MyApi.Services;
 
 namespace MyApi.Endpoints;
@@ -10,14 +11,14 @@ public static class VtuberDbEndPoints
         var group = app.MapGroup("/api/vtuberData");
 
         // vtuber 全件取得
-        group.MapGet("/vtuber", async (VtuberRepository repo) =>
+        group.MapGet("/vtuber", async (IVtuberRepository repo) =>
         {
             var result = await repo.GetAllVtubersAsync();
             return Results.Ok(result);
         });
 
         // vtuber 名前で前方一致検索 (api/vtubers/search?name=白)
-        group.MapGet("/vtuber/name", async (string name, VtuberRepository repo) =>
+        group.MapGet("/vtuber/name", async (string name, IVtuberRepository repo) =>
         {
             if (string.IsNullOrWhiteSpace(name))
             { 
@@ -28,7 +29,7 @@ public static class VtuberDbEndPoints
         });
 
         // vtuber group で検索
-        group.MapGet("/vtuber/groupName", async (string groupName, VtuberRepository repo) =>
+        group.MapGet("/vtuber/groupName", async (string groupName, IVtuberRepository repo) =>
         {
             if (string.IsNullOrWhiteSpace(groupName))
             {
@@ -38,19 +39,21 @@ public static class VtuberDbEndPoints
             return Results.Ok(result);
         });
 
-        // vtuber name or group で検索
-        group.MapGet("/vtuber/filter", async (string name, string group, VtuberRepository repo) =>
+        // vtuber name or group or platfrom で検索
+        group.MapGet("/vtuber/filter", async (string name, string group, string platform, IVtuberRepository repo) =>
         {
-            if (string.IsNullOrWhiteSpace(name) && string.IsNullOrWhiteSpace(group))
+            if (string.IsNullOrWhiteSpace(name) 
+            && string.IsNullOrWhiteSpace(group)
+            && string.IsNullOrWhiteSpace(platform))
             {
                 return Results.BadRequest("検索名を入力してください");
             }
-            var result = await repo.GetVtubersByNmeOrGroupAsync(name, group);
+            var result = await repo.GetVtubersByFilterAsync(name, group, platform);
             return Results.Ok(result);
         });
 
         // vtuber 新規登録
-        group.MapPost("/vtuber", async (VtuberDTO dto, VtuberRepository repo) =>
+        group.MapPost("/vtuber", async (VtuberDTO dto, IVtuberRepository repo) =>
         {
             try
             {
@@ -64,7 +67,7 @@ public static class VtuberDbEndPoints
         });
 
         // vtuber 更新
-        group.MapPut("/vtuber", async (VtuberDTO dto, VtuberRepository repo) =>
+        group.MapPut("/vtuber", async (VtuberDTO dto, IVtuberRepository repo) =>
         {
             try
             {
@@ -78,7 +81,7 @@ public static class VtuberDbEndPoints
         });
 
         // vtuber 削除
-        group.MapDelete("/vtuber", async (int id, VtuberRepository repo) =>
+        group.MapDelete("/vtuber", async (int id, IVtuberRepository repo) =>
         {
             try
             {
@@ -92,14 +95,14 @@ public static class VtuberDbEndPoints
         });
 
         // group 全件取得
-        group.MapGet("/group", async (VtuberRepository repo) =>
+        group.MapGet("/group", async (IVtuberRepository repo) =>
         {
             var result = await repo.GetAllGroupsAsync();
             return Results.Ok(result);
         });
 
         // group 新規登録
-        group.MapPost("/group", async (GroupTable dto, VtuberRepository repo) =>
+        group.MapPost("/group", async (GroupTable dto, IVtuberRepository repo) =>
         {
             try
             {
@@ -113,7 +116,7 @@ public static class VtuberDbEndPoints
         });
 
         // group 更新
-        group.MapPut("/group", async (GroupTable dto, VtuberRepository repo) =>
+        group.MapPut("/group", async (GroupTable dto, IVtuberRepository repo) =>
         {
             try
             {
@@ -127,7 +130,7 @@ public static class VtuberDbEndPoints
         });
 
         // group 削除
-        group.MapDelete("/group", async (int id, VtuberRepository repo) =>
+        group.MapDelete("/group", async (int id, IVtuberRepository repo) =>
         {
             try
             {
@@ -141,14 +144,14 @@ public static class VtuberDbEndPoints
         });
 
         // platform 全件取得
-        group.MapGet("/platform", async (VtuberRepository repo) =>
+        group.MapGet("/platform", async (IVtuberRepository repo) =>
         {
             var result = await repo.GetAllPlatformsAsync();
             return Results.Ok(result);
         });
 
         // platform 新規登録
-        group.MapPost("/platform", async (GroupTable dto, VtuberRepository repo) =>
+        group.MapPost("/platform", async (GroupTable dto, IVtuberRepository repo) =>
         {
             try
             {
@@ -162,7 +165,7 @@ public static class VtuberDbEndPoints
         });
 
         // platform 更新
-        group.MapPut("/platform", async (GroupTable dto, VtuberRepository repo) =>
+        group.MapPut("/platform", async (GroupTable dto, IVtuberRepository repo) =>
         {
             try
             {
@@ -176,7 +179,7 @@ public static class VtuberDbEndPoints
         });
 
         // platform 削除
-        group.MapDelete("/platform", async (int id, VtuberRepository repo) =>
+        group.MapDelete("/platform", async (int id, IVtuberRepository repo) =>
         {
             try
             {
@@ -187,6 +190,13 @@ public static class VtuberDbEndPoints
             {
                 return Results.NotFound(ex.Message);
             }
+        });
+
+        // visitor カウント取得
+        group.MapGet("/visitorCount", async (IVtuberRepository repo) =>
+        {
+            var count = await repo.GetCountAsync();
+            return Results.Ok(count);
         });
     }
 }

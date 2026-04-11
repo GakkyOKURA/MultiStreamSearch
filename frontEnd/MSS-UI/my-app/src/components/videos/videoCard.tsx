@@ -72,7 +72,7 @@ export default function VideoCard({
             <Image
               src={item.channelHighThumbnail.url}
               alt={item.channelName}
-              boxSize={forceColumn ? "40px" : { base: "40px", md: "60px" }} //"60px"
+              boxSize={forceColumn ? "40px" : { base: "40px", md: "60px" }}
               borderRadius="full"
               loading="lazy"
             />

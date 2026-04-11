@@ -1,9 +1,10 @@
-﻿using MyApi.Models;
+﻿using MyApi.Interfaces;
+using MyApi.Models;
 using Npgsql;
 
 namespace MyApi.Services;
 
-public class VtuberRepository
+public class VtuberRepository : IVtuberRepository
 {
     private const string UniqueViolationErrorCode = "23505";
     private const string ForeignKeyViolationErrorCode = "23503";
@@ -19,11 +20,13 @@ public class VtuberRepository
     /// </summary>
     public async Task InitializeDatabaseAsync()
     {
-        using var conn = new NpgsqlConnection(_connectionString);
-        // 非同期で接続
-        await conn.OpenAsync();
+        try
+        {
+            using var conn = new NpgsqlConnection(_connectionString);
+            // 非同期で接続
+            await conn.OpenAsync();
 
-        var sql = @"
+            var sql = @"
             CREATE TABLE IF NOT EXISTS groups (
                 id SERIAL PRIMARY KEY,
                 name TEXT NOT NULL UNIQUE
@@ -41,11 +44,28 @@ public class VtuberRepository
                 platform_id INTEGER REFERENCES platforms(id),
                 channel_id TEXT NOT NULL,
                 UNIQUE (platform_id, channel_id)
-            );";
+            );
 
-        using var cmd = new NpgsqlCommand(sql, conn);
-        // 非同期で実行
-        await cmd.ExecuteNonQueryAsync();
+            CREATE TABLE IF NOT EXISTS access_counts (
+                id SERIAL PRIMARY KEY,
+                page_name TEXT NOT NULL UNIQUE,
+                count BIGINT NOT NULL DEFAULT 0,
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+            );
+
+            INSERT INTO access_counts (page_name, count) 
+            VALUES ('total_visitor', 0)
+            ON CONFLICT (page_name) DO NOTHING;
+            ";
+
+            using var cmd = new NpgsqlCommand(sql, conn);
+            // 非同期で実行
+            await cmd.ExecuteNonQueryAsync();
+        }
+        catch(Exception ex)
+        {
+            Console.Write(ex.ToString());
+        }
     }
 
     public async Task<VtuberResponse> GetAllVtubersAsync()
@@ -77,7 +97,11 @@ public class VtuberRepository
             list.Add(dto);
         }
 
-        return new VtuberResponse { Items = list, TotalCount = list.Count };
+        return new VtuberResponse 
+        { 
+            Items = list,
+            TotalCount = list.Count 
+        };
     }
 
     public async Task<VtuberResponse> GetVtubersByNameAsync(string searchName)
@@ -155,7 +179,7 @@ public class VtuberRepository
         return response;
     }
 
-    public async Task<VtuberResponse> GetVtubersByNmeOrGroupAsync(string searchName, string groupName)
+    public async Task<VtuberResponse> GetVtubersByFilterAsync(string searchName, string groupName, string platform)
     {
         var items = new List<VtuberDTO>();
 
@@ -180,6 +204,10 @@ public class VtuberRepository
         {
             sql += " AND g.name = @groupName";
         }
+        if(!string.IsNullOrEmpty(platform))
+        {
+            sql += " AND p.name = @platform";
+        }
 
         using var cmd = new NpgsqlCommand(sql, conn);
 
@@ -191,6 +219,10 @@ public class VtuberRepository
         if (!string.IsNullOrEmpty(groupName))
         {
             cmd.Parameters.AddWithValue("groupName", groupName);
+        }
+        if (!string.IsNullOrEmpty(platform))
+        {
+            cmd.Parameters.AddWithValue("platform", platform);
         }
 
         using var reader = await cmd.ExecuteReaderAsync();
@@ -453,5 +485,34 @@ public class VtuberRepository
         {
             throw new Exception("このプラットフォームを利用している VTuber のデータが存在するため、削除できません。");
         }
+    }
+
+    public async Task IncrementAsync()
+    {
+        using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+
+        const string sql = @"
+            UPDATE access_counts 
+            SET count = count + 1, 
+                updated_at = CURRENT_TIMESTAMP 
+            WHERE page_name = 'total_visitor';
+        ";
+
+        using var cmd = new NpgsqlCommand(sql, conn);
+        await cmd.ExecuteNonQueryAsync();
+    }
+
+    public async Task<long> GetCountAsync()
+    {
+        using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+
+        const string sql = "SELECT count FROM access_counts WHERE page_name = 'total_visitor';";
+
+        using var cmd = new NpgsqlCommand(sql, conn);
+        var result = await cmd.ExecuteScalarAsync();
+
+        return result is not null ? (long)result : 0;
     }
 }
