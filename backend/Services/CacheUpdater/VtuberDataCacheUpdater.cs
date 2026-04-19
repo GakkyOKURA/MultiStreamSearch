@@ -7,7 +7,6 @@ public class VtuberDataCacheUpdater : BackgroundService
 {
     private readonly ILogger<VtuberDataCacheUpdater> _logger;
     private readonly IServiceProvider _provider;
-    internal static bool FirstUpdateDone { get; set; }
 
     public VtuberDataCacheUpdater(
         ILogger<VtuberDataCacheUpdater> logger,

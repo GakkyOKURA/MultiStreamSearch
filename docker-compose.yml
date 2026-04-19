@@ -1,0 +1,51 @@
+services:
+  db:
+    image: postgres:latest
+    container_name: vtuber-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ./postgres_data:/var/lib/postgresql
+    networks:
+      - app-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: vtuber-redis
+    networks:
+      - app-net
+
+  backend:
+    build:
+      context: ./backend
+    container_name: vtuber-backend
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+      - ASPNETCORE_ENVIRONMENT=Docker
+    expose:
+      - "80"
+    networks:
+      - app-net
+
+  nginx:
+    build:
+      context: .
+      dockerfile: ./nginx/Dockerfile
+    container_name: vtuber-nginx
+    ports:
+      - "80:80"
+      # ローカルでは HTTPS は必須ではないので 443 は開けなくてOK
+      # - "443:443"
+    # volumes:
+    # ローカルで HTTPS を試したいなら自己署名証明書をここにマウント
+    # - ./certs/local.crt:/etc/nginx/certs/local.crt
+    # - ./certs/local.key:/etc/nginx/certs/local.key
+    depends_on:
+      - backend
+    networks:
+      - app-net
+
+networks:
+  app-net:

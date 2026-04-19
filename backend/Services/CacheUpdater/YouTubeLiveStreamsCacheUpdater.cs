@@ -5,20 +5,21 @@ using System.Text.Json;
 
 namespace MyApi.Services.CacheUpdater;
 
-public class TwitchStreamsCacheUpdater : BackgroundService
+public class YouTubeLiveStreamsCacheUpdater : BackgroundService
 {
-    private readonly ILogger<TwitchStreamsCacheUpdater> _logger;
+    private readonly ILogger<YouTubeLiveStreamsCacheUpdater> _logger;
     private readonly IServiceProvider _provider;
-    internal static bool FirstUpdateDone { get; set; }
 
-    public TwitchStreamsCacheUpdater(
-        ILogger<TwitchStreamsCacheUpdater> logger,
+    public YouTubeLiveStreamsCacheUpdater(
+        ILogger<YouTubeLiveStreamsCacheUpdater> logger,
         IServiceProvider provider)
     {
         _logger = logger;
         _provider = provider;
     }
 
+    // Program.cs で AddHostedService を登録した瞬間に “常駐サービス” となり、
+    // アプリ起動時に自動で実行される
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         // この中を無限ループ
@@ -31,46 +32,48 @@ public class TwitchStreamsCacheUpdater : BackgroundService
         }
     }
 
+    // 同じキーに対して新しい値を Set すると、古い値は自動的に上書きされて消える。
+    // TTL（有効期限）も新しく設定される。だからTTLは長めでも大丈夫。
     private async Task UpdateCache(CancellationToken token)
     {
         using var scope = _provider.CreateScope();
 
-        var twitchService = scope.ServiceProvider.GetRequiredService<ITwitchService>();
+        var youTubeService = scope.ServiceProvider.GetRequiredService<IYouTubeService>();
         var cache = scope.ServiceProvider.GetRequiredService<IRedisCacheService>();
 
         var startTime = DateTime.Now;
-        // CA2254 対策
-        _logger.LogInformation("\n{StartTime} Twitch キャッシュ更新開始\n", startTime);
+        _logger.LogInformation("\n{StartTime} YouTube キャッシュ更新開始\n", startTime);
 
         VideoDataResponse? response = null;
         try
         {
-            response = await twitchService.FetchTwitchStreamsAsync();
+            response = await youTubeService.FetchYouTubeLiveStreamsAsync();
         }
         catch (OperationCanceledException)
         {
             var failTime = DateTime.Now;
-            _logger.LogInformation("\n{FailTime} Twitch キャッシュ更新タイムアウト\n", failTime);
+            _logger.LogInformation("\n{FailTime} YouTube キャッシュ更新タイムアウト\n", failTime);
             return;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             var failTime = DateTime.Now;
             var message = ex.Message;
-            _logger.LogInformation("\n{FailTime} Twitch キャッシュ更新エラー {Message} \n", failTime, message);
+            _logger.LogInformation("\n{FailTime} YouTube キャッシュ更新エラー {Message} \n", failTime, message);
             return;
         }
 
-        if(response.Items.Count == 0)
+        // 結果が 0 件の場合は return
+        if (response.Items.Count == 0)
         {
             var noItemsFinishTime = DateTime.Now;
-            _logger.LogInformation("\n{FinishTime} Twitch response 0 件のためキャッシュ更新せず\n", noItemsFinishTime);
+            _logger.LogInformation("\n{FinishTime} YouTube response  0 件のためキャッシュ更新せず\n", noItemsFinishTime);
             return;
         }
 
         var json = JsonSerializer.Serialize(response);
 
-        var cacheKey = CacheKeyHelper.GetCacheKey(VideoType.TwitchStream);
+        var cacheKey = CacheKeyHelper.GetCacheKey(VideoType.YouTubeLiveStream);
         await cache.SetStringAsync(
             cacheKey,
             json,
@@ -78,10 +81,11 @@ public class TwitchStreamsCacheUpdater : BackgroundService
         );
 
         var finishTime = DateTime.Now;
-        _logger.LogInformation("\n{FinishTime} Twitch キャッシュ更新完了\n", finishTime);
+        _logger.LogInformation("\n{FinishTime} YouTube キャッシュ更新完了\n", finishTime);
     }
 
-    // Twitch は API 制限が緩いので1分ごとに更新
+    //TODO: クォータ増加したら更新頻度増やす
+    // youtube は 30 分毎に更新
     private TimeSpan GetDelayUntilNextUpdate()
     {
         var now = DateTime.Now;
@@ -94,7 +98,7 @@ public class TwitchStreamsCacheUpdater : BackgroundService
             now.Hour,
             now.Minute,
             0
-        ).AddMinutes(1);
+        ).AddMinutes(30);
 
         return next - now;
     }

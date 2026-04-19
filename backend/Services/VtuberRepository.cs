@@ -64,7 +64,7 @@ public class VtuberRepository : IVtuberRepository
         }
         catch(Exception ex)
         {
-            Console.Write(ex.ToString());
+            Console.Write($"fail to initialize database{ex}");
         }
     }
 

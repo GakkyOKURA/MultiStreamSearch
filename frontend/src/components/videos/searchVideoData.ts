@@ -3,7 +3,7 @@ import type { VideoDataDTO } from "./videoData";
 import type { VideoWithSummaryDTO, VideoWithSummaryResponse } from "./videoWithSummary";
 
 export const SearchVideoData = async (): Promise<VideoDataDTO[]> => {
-    const url = "https://localhost:7138/api/videos";
+    const url = "/api/videos";
 
     const result = await fetch(url);
     if(!result.ok){
@@ -15,7 +15,7 @@ export const SearchVideoData = async (): Promise<VideoDataDTO[]> => {
 };
 
 export const SearchVideoWithAnalysis = async (): Promise<VideoWithSummaryDTO[]> => {
-    const url = "https://localhost:7138/api/videos/ai";
+    const url = "/api/videos/ai";
 
     const result = await fetch(url);
     if(!result.ok){

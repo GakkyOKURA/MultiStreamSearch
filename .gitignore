@@ -30,6 +30,7 @@ bin/
 obj/
 *.user
 *.suo
+.vs/
 
 # appsettings (keep only base config)
 appsettings.Development.json
@@ -61,9 +62,6 @@ coverage/
 # ============================
 .DS_Store
 Thumbs.db
-
-# docker
-docker-compose.yml
 
 # postgres
 postgres_data/
