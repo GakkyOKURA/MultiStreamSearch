@@ -9,6 +9,7 @@ import {
   MenuTrigger,
   MenuContent,
   MenuItem,
+  Flex,
 } from "@chakra-ui/react";
 
 import { useVideoDataStore, useNeedReloadStore } from "../store/videoStore";
@@ -155,7 +156,12 @@ const SearchPage = () => {
         </IconButton>
       </Box>
 
-      <div style={{ maxWidth: "80%", margin: "0 auto", padding: "20px" }}>
+      <Flex
+        direction="column"
+        maxWidth={{ base: "100%", md: "90%" }}
+        margin="0 auto"
+        padding="20px"
+      >
         <SimpleGrid columns={{ base: 1, md: 1 }} gap="16px" marginTop={"60px"}>
           {videoDataResults.map((item, index) => (
             <Box
@@ -166,7 +172,7 @@ const SearchPage = () => {
             </Box>
           ))}
         </SimpleGrid>
-      </div>
+      </Flex>
     </div>
   );
 };

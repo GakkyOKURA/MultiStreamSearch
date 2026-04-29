@@ -3,7 +3,8 @@ import type { VideoDataDTO } from "./videoData";
 import type { VideoWithSummaryDTO, VideoWithSummaryResponse } from "./videoWithSummary";
 
 export const SearchVideoData = async (): Promise<VideoDataDTO[]> => {
-    const url = "/api/videos";
+    const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
+    const url = `${baseUrl}/api/videos`;
 
     const result = await fetch(url);
     if(!result.ok){
@@ -15,7 +16,8 @@ export const SearchVideoData = async (): Promise<VideoDataDTO[]> => {
 };
 
 export const SearchVideoWithAnalysis = async (): Promise<VideoWithSummaryDTO[]> => {
-    const url = "/api/videos/ai";
+    const baseUrl = import.meta.env.VITE_API_BASE_URL ?? "";
+    const url = `${baseUrl}/api/videos/ai`;
 
     const result = await fetch(url);
     if(!result.ok){

@@ -14,6 +14,9 @@ export const VideoPlayer = ({
     return <div>Invalid video URL</div>;
   }
 
+  // 開発時は env.development の値を使用
+  const parent = import.meta.env.VITE_TWITCH_PARENT ?? "vindies.jp";
+
   if (platform === "youtubeLiveStream") {
     return (
       <AspectRatio ratio={16 / 9} width="100%">
@@ -30,7 +33,7 @@ export const VideoPlayer = ({
     return (
       <AspectRatio ratio={16 / 9} width="100%">
         <iframe
-          src={`https://player.twitch.tv/?channel=${id}&parent=localhost&autoplay=true&muted=false`}
+          src={`https://player.twitch.tv/?channel=${id}&parent=${parent}&autoplay=true&muted=false`}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; keyboard-map"
           allowFullScreen
         />

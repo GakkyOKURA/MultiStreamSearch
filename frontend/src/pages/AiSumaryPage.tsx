@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { SimpleGrid } from "@chakra-ui/react";
+import { Flex, SimpleGrid } from "@chakra-ui/react";
 
 import { useVideoWithAnalysisStore } from "../store/videoStore";
 import { SearchVideoWithAnalysis } from "../components/videos/searchVideoData";
@@ -23,13 +23,18 @@ const SearchSummaryPage = () => {
   return (
     <div>
       <CommonHeader />
-      <div style={{ maxWidth: "80%", margin: "0 auto", padding: "20px" }}>
+      <Flex
+        direction="column"
+        maxWidth={{ base: "100%", md: "90%" }}
+        margin="0 auto"
+        padding="20px"
+      >
         <SimpleGrid gap="16px" marginTop={"60px"}>
           {videoDataResults.map((item) => (
             <VideoWithAnalysisCard key={item.videoId} item={item} />
           ))}
         </SimpleGrid>
-      </div>
+      </Flex>
     </div>
   );
 };

@@ -7,7 +7,7 @@ using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ★ https 用に CORS を追加
+// https 用に CORS を追加
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -98,7 +98,7 @@ app.Use(async (context, next) =>
     {
         Expires = DateTimeOffset.Now.AddDays(1),
         HttpOnly = true, // JavaScript から触らせない。クロスサイトスクリプティング攻撃対策
-        Secure = false,   // HTTPS の時は true だが、今回は http なので false
+        Secure = false,   // nginx が https 通信を行い、docker ネットワーク内では http なので false
         SameSite = SameSiteMode.Strict // 他のサイトからのリクエストには同梱しない
     });
 

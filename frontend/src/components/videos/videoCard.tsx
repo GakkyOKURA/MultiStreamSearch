@@ -9,7 +9,7 @@ import {
 
 export default function VideoCard({
   item,
-  forceColumn = false,
+  forceColumn = false, // 縦表示するときは true
 }: {
   item: VideoDataDTO;
   forceColumn?: boolean;
