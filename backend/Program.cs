@@ -47,14 +47,14 @@ builder.Services.AddHttpClient<ITwitchService, TwitchService>();
 builder.Services.AddHttpClient<IAiService, AiSummaryService>();
 builder.Services.AddScoped<IVideoService, VideoService>();
 
-// YouTube のキャッシュ更新サービスを追加
-builder.Services.AddHostedService<YouTubeLiveStreamsCacheUpdater>();
-// Twitch のキャッシュ更新サービスを追加
-builder.Services.AddHostedService<TwitchStreamsCacheUpdater>();
-// Gemini のキャッシュ更新サービスを追加
-builder.Services.AddHostedService<AiSummaryCacheUpdater>();
-// vtuberData のキャッシュ更新サービスを追加
-builder.Services.AddHostedService<VtuberDataCacheUpdater>();
+//// YouTube のキャッシュ更新サービスを追加
+//builder.Services.AddHostedService<YouTubeLiveStreamsCacheUpdater>();
+//// Twitch のキャッシュ更新サービスを追加
+//builder.Services.AddHostedService<TwitchStreamsCacheUpdater>();
+//// Gemini のキャッシュ更新サービスを追加
+//builder.Services.AddHostedService<AiSummaryCacheUpdater>();
+//// vtuberData のキャッシュ更新サービスを追加
+//builder.Services.AddHostedService<VtuberDataCacheUpdater>();
 
 // 初回起動時のキャッシュ更新処理を追加
 builder.Services.AddHostedService<StartupCacheUpdater>();

@@ -29,7 +29,12 @@ const VideoPage = () => {
   // ローディング状態を管理するフラグ
   const [isLoading, setIsLoading] = useState(false);
 
-  // videoStore が空の場合は useeffect で再レンダリング
+  const { open, onToggle } = useDisclosure();
+
+  const listBoxRef = useRef<HTMLDivElement | null>(null);
+  const scrollPositionRef = useRef<number>(0);
+
+  // videoStore が空の場合は useEffect で再レンダリング
   useEffect(() => {
     const fetchData = async () => {
       // ストアが空の場合のみ、バックエンドから取得
@@ -44,7 +49,14 @@ const VideoPage = () => {
     fetchData();
   }, [results.length, setResults]);
 
-  // 3. パラメータがない場合やローディング中の早期リターン
+  // 開く時にスクロール位置を復元
+  useEffect(() => {
+    if (open && listBoxRef.current) {
+      listBoxRef.current.scrollTop = scrollPositionRef.current;
+    }
+  }, [open]);
+
+  // パラメータがない場合やローディング中の早期リターン
   if (!platform || !id) {
     return null;
   }
@@ -67,11 +79,6 @@ const VideoPage = () => {
     return null;
   }
 
-  const { open, onToggle } = useDisclosure();
-
-  const listBoxRef = useRef<HTMLDivElement | null>(null);
-  const scrollPositionRef = useRef<number>(0);
-
   // 閉じる時にスクロール位置を保存
   const handleToggle = () => {
     if (open && listBoxRef.current) {
@@ -88,13 +95,6 @@ const VideoPage = () => {
       }, 100);
     }
   };
-
-  // 開く時にスクロール位置を復元
-  useEffect(() => {
-    if (open && listBoxRef.current) {
-      listBoxRef.current.scrollTop = scrollPositionRef.current;
-    }
-  }, [open]);
 
   return (
     <div>
