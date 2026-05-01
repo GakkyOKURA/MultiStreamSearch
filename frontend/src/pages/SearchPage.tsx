@@ -160,7 +160,6 @@ const SearchPage = () => {
         direction="column"
         maxWidth={{ base: "100%", md: "90%" }}
         margin="0 auto"
-        padding="20px"
       >
         <SimpleGrid columns={{ base: 1, md: 1 }} gap="16px" marginTop={"60px"}>
           {videoDataResults.map((item, index) => (

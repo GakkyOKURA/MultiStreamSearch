@@ -109,12 +109,16 @@ const VideoPage = () => {
       >
         <Box
           flex="7"
-          pl={{ base: "15px", md: "40px" }}
-          pr="15px"
+          pl={{ base: "0px", md: "40px" }}
+          pr={{ base: "0px", md: "15px" }}
           overflowY="auto"
         >
           <VideoPlayer platform={platform} id={id} />
-          <Box mb="16px">
+          <Box
+            mb="16px"
+            pl={{ base: "15px", md: "0px" }}
+            pr={{ base: "15px", md: "0px" }}
+          >
             <Text fontSize="2xl" fontWeight="bold">
               {currentVideo.videoTitle}
             </Text>
@@ -155,20 +159,21 @@ const VideoPage = () => {
           }}
           height={{ base: "300px", md: "100%" }}
           alignSelf="center"
-          maxWidth={{ base: "95%", md: "none" }}
+          maxWidth={{ base: "100%", md: "none" }}
           flex="3"
           overflowY="auto"
-          minH={{ base: open ? "700px" : "50px", md: "auto" }}
-          maxH={{ base: "720px", md: "100%" }}
+          minH={{ base: "50px", md: "auto" }}
+          maxH={{ base: "calc(100vh - 10px)", md: "100%" }}
         >
           <Box
             position="sticky"
             top="0"
             zIndex="1"
             bg="white"
-            display={{ base: "block", md: "none" }}
+            display={{ base: "flex", md: "none" }}
+            justifyContent="center"
           >
-            <Button width="100%" onClick={handleToggle}>
+            <Button width="90%" onClick={handleToggle}>
               {open ? "動画リストを閉じる" : "動画リストを開く"}
             </Button>
           </Box>

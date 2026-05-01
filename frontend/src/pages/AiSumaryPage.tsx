@@ -27,7 +27,6 @@ const SearchSummaryPage = () => {
         direction="column"
         maxWidth={{ base: "100%", md: "90%" }}
         margin="0 auto"
-        padding="20px"
       >
         <SimpleGrid gap="16px" marginTop={"60px"}>
           {videoDataResults.map((item) => (

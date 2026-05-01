@@ -9,7 +9,7 @@ import {
 
 export default function VideoCard({
   item,
-  forceColumn = false, // 縦表示するときは true
+  forceColumn = false, // 縦表示するときは true。モバイルと、 VideoPage のリストの時。
 }: {
   item: VideoDataDTO;
   forceColumn?: boolean;

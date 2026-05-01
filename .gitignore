@@ -66,6 +66,7 @@ Thumbs.db
 
 # postgres
 postgres_data/
+*.sql
 
 # docker
 docker-compose.override.yml
