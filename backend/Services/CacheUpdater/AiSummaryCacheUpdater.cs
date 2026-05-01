@@ -24,6 +24,8 @@ public class AiSummaryCacheUpdater : BackgroundService
         {
             var delay = GetDelayUntilNextUpdate();
             await Task.Delay(delay, stoppingToken);
+            // youtube と更新時間がかぶっているので、さらに少し待って youtube を先に終わらせる。
+            await Task.Delay(TimeSpan.FromMinutes(2), stoppingToken);
 
             await UpdateCache(stoppingToken);
         }

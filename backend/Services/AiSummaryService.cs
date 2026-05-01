@@ -9,6 +9,7 @@ using OpenAI.Chat;
 using System;
 using System.ClientModel;
 using System.ClientModel.Primitives;
+using System.Net;
 using System.Text.Json;
 
 namespace MyApi.Services;
@@ -20,8 +21,12 @@ public class AiSummaryService : IAiService
     private readonly AiApiSettings _settings;
     private readonly ILogger<AiSummaryService> _logger;
 
-    //private const string ModelId = "gemini-2.5-flash-lite";
-    private const string ModelId = "gemini-3.1-flash-lite-preview";
+    private readonly static string[] GeminiModelIds =
+    [
+        "gemini-3.1-flash-lite-preview",
+        "gemini-2.5-flash-lite",
+        "gemini-2.5-flash"
+    ];
 
     public AiSummaryService(
         IRedisCacheService cache,
@@ -87,7 +92,7 @@ public class AiSummaryService : IAiService
         return await _cache.GetAsync<VideoDataResponse>(cacheKey) ?? new();
     }
 
-    // テスト時は gemini の無料枠を使用
+    // gemini
     private async Task<ChannelSummaryResponse> GenerateSummaryAsync_Gemini(List<ProvideingVtuberData> targets)
     {
         var inputJson = JsonSerializer.Serialize(targets);
@@ -98,10 +103,7 @@ public class AiSummaryService : IAiService
         // リクエストボディの作成（JSON モードを有効化）
         var requestBody = CreateGeminiBody(prompt, responseSchema);
 
-        var url = $"https://generativelanguage.googleapis.com/v1beta/models/" +
-            $"{ModelId}:generateContent?key={_settings.GeminiApiKey}";
-
-        var (httpResponse, msg) = await GetHttpResponseWithRetryAsync(url, requestBody);
+        var (httpResponse, msg) = await GetHttpResponseByEachModels(requestBody);
         if (httpResponse is null)
         {
             ShowLog(msg);
@@ -180,23 +182,55 @@ public class AiSummaryService : IAiService
         };
     }
 
-    private async Task<(HttpResponseMessage? response, string errorMsg)> GetHttpResponseWithRetryAsync(
+    /// <summary>
+    /// 503 に備えて、1つのモデルで 503 が出た場合、次のモデルを試す
+    /// </summary>
+    /// <param name="requestBody"></param>
+    /// <returns></returns>
+    private async Task<(HttpResponseMessage? response, string errorMsg)> GetHttpResponseByEachModels(
+        object requestBody)
+    {
+        foreach(var geminiModelId in GeminiModelIds)
+        {
+            var url = $"https://generativelanguage.googleapis.com/v1beta/models/" +
+            $"{geminiModelId}:generateContent?key={_settings.GeminiApiKey}";
+            var (response, statusCode) = await GetHttpResponseWithRetryAsync(url, requestBody);
+            // response が null じゃない = 成功した場合は即 return
+            if(response is not null)
+            {
+                return (response, "");
+            }
+            
+            // 503 以外の場合も即 return
+            if(statusCode != HttpStatusCode.ServiceUnavailable)
+            {
+                return (null, $"ai リクエスト {statusCode} エラー");
+            }
+        }
+
+        // 全ての model が 503 の場合
+        return (null, "ai リクエスト 503 エラー");
+    }
+
+    private async Task<(HttpResponseMessage? response, HttpStatusCode statusCode)> GetHttpResponseWithRetryAsync(
         string url, 
         object requestBody)
     {
         var maxRetries = 3;
+        HttpStatusCode statusCode = default;
         for (var tryCount = 0; tryCount <= maxRetries; tryCount++)
         {
             var response = await _httpClient.PostAsJsonAsync(url, requestBody);
             if (response.IsSuccessStatusCode)
             {
-                return (response, "");
+                return (response, response.StatusCode);
             }
 
             using (response)
             {
+                statusCode = response.StatusCode;
                 // 503 の場合は待機してリトライ
-                if (response.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
+                if (response.StatusCode == HttpStatusCode.ServiceUnavailable)
                 {
                     if (tryCount != maxRetries)
                     {
@@ -205,17 +239,18 @@ public class AiSummaryService : IAiService
                         continue;
                     }
                 }
+                // 503 以外のエラーはリトライしない
                 else if (!response.IsSuccessStatusCode)
                 {
-                    return (null, $"ai リクエスト {response.StatusCode} エラー");
+                    break;
                 }
             }
         }
 
-        return (null, "ai リクエスト 503 エラー");
+        return (null, statusCode);
     }
 
-    // 本番運用は strict が優秀な open ai を使用
+    // strict が優秀な open ai にリクエストを送るメソッド
     private async Task<ChannelSummaryResponse> GenerateSummaryAsync_OpenAI(List<ProvideingVtuberData> targets)
     {
         var inputJson = JsonSerializer.Serialize(targets);
