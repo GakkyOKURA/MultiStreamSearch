@@ -1,17 +1,27 @@
 //共通の動画再生ページ
 import { useParams } from "react-router-dom";
 import { useVideoDataStore } from "../store/videoStore";
-import { Box, Flex, Image, Separator, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Flex,
+  Image,
+  Separator,
+  Text,
+  useDisclosure,
+} from "@chakra-ui/react";
+
 import {
   VideoList,
   VideoPlayer,
 } from "../components/videos/videoPageComponents";
+
 import { CommonHeader } from "../components/common/commonHeader";
 import { SearchVideoData } from "../components/videos/searchVideoData";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const VideoPage = () => {
-  // 1. Hooks は関数のトップレベルで呼ぶ
+  // Hooks は関数のトップレベルで呼ぶ
   const { platform, id } = useParams();
   const results = useVideoDataStore((s) => s.results);
   const setResults = useVideoDataStore((s) => s.setResults);
@@ -57,9 +67,40 @@ const VideoPage = () => {
     return null;
   }
 
+  const { open, onToggle } = useDisclosure();
+
+  const listBoxRef = useRef<HTMLDivElement | null>(null);
+  const scrollPositionRef = useRef<number>(0);
+
+  // 閉じる時にスクロール位置を保存
+  const handleToggle = () => {
+    if (open && listBoxRef.current) {
+      scrollPositionRef.current = listBoxRef.current.scrollTop;
+    }
+    onToggle();
+    if (!open) {
+      // 直後だと dom が更新されてないので、少し待つ
+      setTimeout(() => {
+        window.scrollTo({
+          top: document.body.scrollHeight,
+          behavior: "auto",
+        });
+      }, 100);
+    }
+  };
+
+  // 開く時にスクロール位置を復元
+  useEffect(() => {
+    if (open && listBoxRef.current) {
+      listBoxRef.current.scrollTop = scrollPositionRef.current;
+    }
+  }, [open]);
+
   return (
     <div>
-      <CommonHeader />
+      <Box display={{ base: open ? "none" : "block", md: "block" }}>
+        <CommonHeader />
+      </Box>
       <Flex
         height={{ base: "none", md: "100vh" }}
         flexDirection={{ base: "column", md: "row" }}
@@ -102,15 +143,47 @@ const VideoPage = () => {
         </Box>
 
         <Box
+          ref={listBoxRef}
+          css={{
+            overscrollBehavior: "contain",
+            "@media (max-width: 768px)": {
+              "&::-webkit-scrollbar": {
+                display: "none",
+              },
+              scrollbarWidth: "none",
+            },
+          }}
           height={{ base: "300px", md: "100%" }}
           alignSelf="center"
-          maxWidth={{ base: "80%", md: "none" }}
+          maxWidth={{ base: "95%", md: "none" }}
           flex="3"
           overflowY="auto"
-          minH={{ base: "700px", md: "auto" }}
-          maxH={{ base: "700px", md: "100%" }}
+          minH={{ base: open ? "700px" : "50px", md: "auto" }}
+          maxH={{ base: "720px", md: "100%" }}
         >
-          <VideoList videos={results} platform={platform} id={id} />
+          <Box
+            position="sticky"
+            top="0"
+            zIndex="1"
+            bg="white"
+            display={{ base: "block", md: "none" }}
+          >
+            <Button width="100%" onClick={handleToggle}>
+              {open ? "動画リストを閉じる" : "動画リストを開く"}
+            </Button>
+          </Box>
+
+          <Box
+            visibility={{ base: open ? "visible" : "hidden", md: "visible" }}
+            height={{ base: open ? "auto" : "0", md: "auto" }}
+          >
+            <VideoList
+              videos={results}
+              platform={platform}
+              id={id}
+              isVisible={open}
+            />
+          </Box>
         </Box>
       </Flex>
     </div>

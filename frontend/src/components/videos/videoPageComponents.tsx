@@ -46,14 +46,20 @@ export const VideoList = ({
   videos,
   platform,
   id,
+  isVisible,
 }: {
   videos: VideoDataDTO[];
   platform: string;
   id: string;
+  isVisible?: boolean;
 }) => {
   const currentRef = useRef<HTMLDivElement | null>(null);
 
+  const hasScrolled = useRef(false);
+
   useEffect(() => {
+    // PC の場合（isVisible が undefined）は従来通り
+    //if (isVisible === undefined) {
     if (currentRef.current) {
       currentRef.current.scrollIntoView({
         behavior: "auto",
@@ -61,13 +67,28 @@ export const VideoList = ({
       });
     }
 
-    // 主に 縦画面用。
-    // これが無いと動画リストにスクロールしたままになってしまう
-    window.scrollTo({
-      top: 0,
-      behavior: "auto",
-    });
-  }, []);
+    // モバイルの場合
+    if (hasScrolled.current) {
+      return;
+    }
+    if (!isVisible) {
+      window.scrollTo({ top: 0, behavior: "auto" });
+      return;
+    }
+
+    if (currentRef.current) {
+      // 直後だと dom が更新されてないので、少し待つ
+      // 0 で問題ないことを確認。ただし setTimeout で囲うのは必須。
+      setTimeout(() => {
+        currentRef.current!.scrollIntoView({
+          behavior: "auto",
+          block: "center",
+        });
+      }, 0);
+      hasScrolled.current = true;
+      console.log("hellolll");
+    }
+  }, [isVisible]);
 
   return (
     <div style={{ overflowY: "auto", height: "100%" }}>
