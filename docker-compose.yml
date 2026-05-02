@@ -36,12 +36,9 @@ services:
     container_name: vtuber-nginx
     ports:
       - "80:80"
-      # ローカルでは HTTPS は必須ではないので 443 は開けなくてOK
-      # - "443:443"
-    # volumes:
-    # ローカルで HTTPS を試したいなら自己署名証明書をここにマウント
-    # - ./certs/local.crt:/etc/nginx/certs/local.crt
-    # - ./certs/local.key:/etc/nginx/certs/local.key
+      - "443:443"
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - backend
     networks:
