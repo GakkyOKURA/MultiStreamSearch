@@ -163,7 +163,7 @@ const VideoPage = () => {
           flex="3"
           overflowY="auto"
           minH={{ base: "50px", md: "auto" }}
-          maxH={{ base: "calc(100vh - 10px)", md: "100%" }}
+          maxH={{ base: "calc(100dvh - 10px)", md: "100%" }}
         >
           <Box
             position="sticky"
