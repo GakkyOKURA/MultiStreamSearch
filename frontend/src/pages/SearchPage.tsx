@@ -93,6 +93,7 @@ const SearchPage = () => {
         justifyContent="flex-start"
       >
         <IconButton variant={"plain"} marginLeft={{ base: "5", md: "10" }}>
+          {/* データ再取得 */}
           <Image
             src={vindiesIcon}
             borderRadius="full"
@@ -100,6 +101,7 @@ const SearchPage = () => {
             onClick={resetVideos}
           />
 
+          {/* 利用規約、プライバシーポリシー */}
           <MenuRoot>
             <MenuTrigger asChild>
               <Image marginLeft={2} src={bookIcon} boxSize={"40px"} />
@@ -132,6 +134,46 @@ const SearchPage = () => {
             </MenuContent>
           </MenuRoot>
 
+          {/* サイトについて */}
+          <Link
+            to="/howToUse"
+            onClick={() =>
+              // ここでリロード不要のフラグをセット
+              useNeedReloadStore.getState().setIsReloadNeeded(false)
+            }
+          >
+            <Tooltip.Root>
+              <Tooltip.Trigger asChild>
+                <Image src={questionIcon} boxSize={"40px"} marginLeft={2} />
+              </Tooltip.Trigger>
+              <Tooltip.Positioner>
+                <Tooltip.Content>
+                  {"サイトについて"}
+                  <Tooltip.Arrow />
+                </Tooltip.Content>
+              </Tooltip.Positioner>
+            </Tooltip.Root>
+          </Link>
+
+          {/* ランダム選択 */}
+          <Tooltip.Root>
+            <Tooltip.Trigger asChild>
+              <Image
+                src={shuffleIcon}
+                boxSize={"40px"}
+                onClick={randomChoose}
+                marginLeft={2}
+              />
+            </Tooltip.Trigger>
+            <Tooltip.Positioner>
+              <Tooltip.Content>
+                {"ランダム Pick"}
+                <Tooltip.Arrow />
+              </Tooltip.Content>
+            </Tooltip.Positioner>
+          </Tooltip.Root>
+
+          {/* AI ランダム紹介 */}
           <Link
             to="/analysis"
             onClick={() =>
@@ -151,43 +193,6 @@ const SearchPage = () => {
               <Tooltip.Positioner>
                 <Tooltip.Content>
                   {"AI ランダム紹介"}
-                  <Tooltip.Arrow />
-                </Tooltip.Content>
-              </Tooltip.Positioner>
-            </Tooltip.Root>
-          </Link>
-
-          <Tooltip.Root>
-            <Tooltip.Trigger asChild>
-              <Image
-                src={shuffleIcon}
-                boxSize={"40px"}
-                onClick={randomChoose}
-                marginLeft={2}
-              />
-            </Tooltip.Trigger>
-            <Tooltip.Positioner>
-              <Tooltip.Content>
-                {"ランダム Pick"}
-                <Tooltip.Arrow />
-              </Tooltip.Content>
-            </Tooltip.Positioner>
-          </Tooltip.Root>
-
-          <Link
-            to="/howToUse"
-            onClick={() =>
-              // ここでリロード不要のフラグをセット
-              useNeedReloadStore.getState().setIsReloadNeeded(false)
-            }
-          >
-            <Tooltip.Root>
-              <Tooltip.Trigger asChild>
-                <Image src={questionIcon} boxSize={"40px"} marginLeft={2} />
-              </Tooltip.Trigger>
-              <Tooltip.Positioner>
-                <Tooltip.Content>
-                  {"サイトについて"}
                   <Tooltip.Arrow />
                 </Tooltip.Content>
               </Tooltip.Positioner>

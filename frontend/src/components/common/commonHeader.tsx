@@ -6,11 +6,13 @@ import {
   MenuItem,
   MenuRoot,
   MenuTrigger,
+  Tooltip,
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import { useNeedReloadStore } from "../../store/videoStore";
 import vindiesIcon from "../../assets/Vindies_Icon2.png";
 import bookIcon from "../../assets/bookIcon.png";
+import questionIcon from "../../assets/QuestionIcon.png";
 
 export const CommonHeader = () => {
   return (
@@ -25,6 +27,7 @@ export const CommonHeader = () => {
       justifyContent="flex-start"
     >
       <IconButton variant={"plain"} marginLeft={"10"}>
+        {/* SearchPage へ遷移、データの再取得 */}
         <Link
           to="/"
           onClick={() =>
@@ -36,6 +39,7 @@ export const CommonHeader = () => {
           <Image src={vindiesIcon} borderRadius="full" boxSize={"50px"} />
         </Link>
 
+        {/* 利用規約、プライバシーポリシー */}
         <MenuRoot>
           <MenuTrigger asChild>
             <Image src={bookIcon} boxSize={"40px"} marginLeft={2} />
@@ -65,6 +69,27 @@ export const CommonHeader = () => {
             </MenuItem>
           </MenuContent>
         </MenuRoot>
+
+        {/* サイトについて */}
+        <Link
+          to="/howToUse"
+          onClick={() =>
+            // ここでリロード不要のフラグをセット
+            useNeedReloadStore.getState().setIsReloadNeeded(false)
+          }
+        >
+          <Tooltip.Root>
+            <Tooltip.Trigger asChild>
+              <Image src={questionIcon} boxSize={"40px"} marginLeft={2} />
+            </Tooltip.Trigger>
+            <Tooltip.Positioner>
+              <Tooltip.Content>
+                {"サイトについて"}
+                <Tooltip.Arrow />
+              </Tooltip.Content>
+            </Tooltip.Positioner>
+          </Tooltip.Root>
+        </Link>
       </IconButton>
     </Box>
   );
