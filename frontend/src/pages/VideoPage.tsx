@@ -35,11 +35,6 @@ const VideoPage = () => {
   const listBoxRef = useRef<HTMLDivElement | null>(null);
   const scrollPositionRef = useRef<number>(0);
 
-  const channelUrl =
-    platform === "youtubeLiveStream"
-      ? `https://www.youtube.com/channel/${id}`
-      : `https://www.twitch.tv/${id}`;
-
   // videoStore が空の場合は useEffect で再レンダリング
   useEffect(() => {
     const fetchData = async () => {
@@ -71,7 +66,9 @@ const VideoPage = () => {
     return <div>ロード中...</div>;
   }
 
-  // 4. 現在のビデオを特定する（results が更新されたら自動で再計算される）
+  // 現在のビデオを特定する（results が更新されたら自動で再計算される）
+  // platform と id があれば、 currentVideo が取得可能
+  // そのため上記 2 つは url として設定しておく必要がある
   const currentVideo =
     platform === "youtubeLiveStream"
       ? results.find((v) => v.videoId === id)
@@ -84,6 +81,11 @@ const VideoPage = () => {
     }
     return null;
   }
+
+  const channelUrl =
+    platform === "youtubeLiveStream"
+      ? `https://www.youtube.com/channel/${currentVideo.channelId}`
+      : `https://www.twitch.tv/${id}`;
 
   // 閉じる時にスクロール位置を保存
   const handleToggle = () => {
