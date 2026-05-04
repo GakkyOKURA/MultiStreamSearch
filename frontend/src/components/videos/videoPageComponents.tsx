@@ -86,7 +86,6 @@ export const VideoList = ({
         });
       }, 0);
       hasScrolled.current = true;
-      console.log("hellolll");
     }
   }, [isVisible]);
 

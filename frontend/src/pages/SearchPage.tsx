@@ -21,8 +21,10 @@ import vindiesIcon from "../assets/Vindies_Icon2.png";
 import robotIcon from "../assets/robotIcon.png";
 import shuffleIcon from "../assets/shuffle.png";
 import bookIcon from "../assets/bookIcon.png";
+import questionIcon from "../assets/QuestionIcon.png";
 
 const SearchPage = () => {
+  // ランダム選択の時に使用
   const videoRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const setVideoDataResults = useVideoDataStore((s) => s.setResults);
@@ -30,27 +32,30 @@ const SearchPage = () => {
 
   useEffect(() => {
     const load = async () => {
-      var reloadNeeded = useNeedReloadStore.getState().isReloadNeeded;
-      // false の場合 = 動画再生ページから戻ってきたとき
-      // かつ、念のため videoDataResult のカウントもチェック
+      const reloadNeeded = useNeedReloadStore.getState().isReloadNeeded;
+      // false の場合 = ブラウザの戻るボタンで SearchPage に戻ってきたとき。
+      // アイコンを押して戻ってきた場合は true になっている
       if (!reloadNeeded && videoDataResults.length != 0) {
         // 値のリセット
         useNeedReloadStore.getState().setIsReloadNeeded(true);
+        // 画面を top には戻さない
         return;
       }
 
-      // リロードの時、ページ初期表示の時のみ動画リスト更新
       const data = await SearchVideoData();
       setVideoDataResults(data);
 
+      // スクロールをトップへ
       window.scrollTo({
         top: 0,
         behavior: "instant",
       });
     };
+
     load();
   }, []); // 空配列で初回だけ実行の合図
 
+  // ランダム選択ボタンを押したときの挙動
   const randomChoose = () => {
     if (videoDataResults.length === 0) {
       return;
@@ -68,6 +73,13 @@ const SearchPage = () => {
     }
   };
 
+  // データの再取得
+  const resetVideos = async () => {
+    setVideoDataResults([]);
+    const data = await SearchVideoData();
+    setVideoDataResults(data);
+  };
+
   return (
     <div>
       <Box
@@ -80,12 +92,50 @@ const SearchPage = () => {
         display="flex"
         justifyContent="flex-start"
       >
-        <IconButton variant={"plain"} marginLeft={"10"}>
-          <Image src={vindiesIcon} borderRadius="full" boxSize={"50px"} />
+        <IconButton variant={"plain"} marginLeft={{ base: "5", md: "10" }}>
+          <Image
+            src={vindiesIcon}
+            borderRadius="full"
+            boxSize={"50px"}
+            onClick={resetVideos}
+          />
+
+          <MenuRoot>
+            <MenuTrigger asChild>
+              <Image marginLeft={2} src={bookIcon} boxSize={"40px"} />
+            </MenuTrigger>
+
+            <MenuContent>
+              <MenuItem value="terms" asChild>
+                <Link
+                  to="/termsOfService"
+                  onClick={() =>
+                    // ここでリロード不要のフラグをセット
+                    useNeedReloadStore.getState().setIsReloadNeeded(false)
+                  }
+                >
+                  利用規約
+                </Link>
+              </MenuItem>
+
+              <MenuItem value="privacy" asChild>
+                <Link
+                  to="/privacyPolicy"
+                  onClick={() =>
+                    // ここでリロード不要のフラグをセット
+                    useNeedReloadStore.getState().setIsReloadNeeded(false)
+                  }
+                >
+                  プライバシーポリシー
+                </Link>
+              </MenuItem>
+            </MenuContent>
+          </MenuRoot>
 
           <Link
             to="/analysis"
             onClick={() =>
+              // ここでリロード不要のフラグをセット
               useNeedReloadStore.getState().setIsReloadNeeded(false)
             }
           >
@@ -124,35 +174,25 @@ const SearchPage = () => {
             </Tooltip.Positioner>
           </Tooltip.Root>
 
-          <MenuRoot>
-            <MenuTrigger asChild>
-              <Image src={bookIcon} boxSize={"40px"} />
-            </MenuTrigger>
-
-            <MenuContent>
-              <MenuItem value="terms" asChild>
-                <Link
-                  to="/termsOfService"
-                  onClick={() =>
-                    useNeedReloadStore.getState().setIsReloadNeeded(false)
-                  }
-                >
-                  利用規約
-                </Link>
-              </MenuItem>
-
-              <MenuItem value="privacy" asChild>
-                <Link
-                  to="/privacyPolicy"
-                  onClick={() =>
-                    useNeedReloadStore.getState().setIsReloadNeeded(false)
-                  }
-                >
-                  プライバシーポリシー
-                </Link>
-              </MenuItem>
-            </MenuContent>
-          </MenuRoot>
+          <Link
+            to="/howToUse"
+            onClick={() =>
+              // ここでリロード不要のフラグをセット
+              useNeedReloadStore.getState().setIsReloadNeeded(false)
+            }
+          >
+            <Tooltip.Root>
+              <Tooltip.Trigger asChild>
+                <Image src={questionIcon} boxSize={"40px"} marginLeft={2} />
+              </Tooltip.Trigger>
+              <Tooltip.Positioner>
+                <Tooltip.Content>
+                  {"サイトについて"}
+                  <Tooltip.Arrow />
+                </Tooltip.Content>
+              </Tooltip.Positioner>
+            </Tooltip.Root>
+          </Link>
         </IconButton>
       </Box>
 

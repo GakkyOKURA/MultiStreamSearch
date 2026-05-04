@@ -63,16 +63,25 @@ var app = builder.Build();
 
 app.Use(async (context, next) =>
 {
-    // API へのアクセス、かつ GET リクエストの時だけカウント
-    if (!context.Request.Path.StartsWithSegments("/api") || !(context.Request.Method == "GET"))
+    // db を操作する api のパスであった場合、自身の WPF アプリから以外の場合ははじく
+    if (context.Request.Path.StartsWithSegments("/api/vtuberData"))
     {
+        // WPF アプリ側でヘッダーを付加済み
+        var apiKey = context.Request.Headers["X-DB-Api-Key"].ToString();
+        var expectedKey = builder.Configuration["DBAdminApiKey"];
+
+        if (apiKey != expectedKey)
+        {
+            context.Response.StatusCode = 401;
+            return;
+        }
+
         await next();
         return;
     }
 
-    // User-Agent が自分の WPF アプリだったらカウントしない
-    var userAgent = context.Request.Headers["User-Agent"].ToString();
-    if (userAgent.Contains("VtuberDbMgr"))
+    // API へのアクセス、かつ GET リクエストの時だけカウント
+    if (!context.Request.Path.StartsWithSegments("/api/videos") || !(context.Request.Method == "GET"))
     {
         await next();
         return;

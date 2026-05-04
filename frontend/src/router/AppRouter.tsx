@@ -4,6 +4,7 @@ import VideoPage from "../pages/VideoPage";
 import SearchSummaryPage from "../pages/AiSumaryPage";
 import TermsOfServicePage from "../pages/TermsOfServicePage";
 import PrivacyPolicyPage from "../pages/PrivacyPolicyPage";
+import HowToUsePage from "../pages/HowToUsePage";
 
 export default function AppRouter() {
   const location = useLocation();
@@ -14,6 +15,7 @@ export default function AppRouter() {
       <Route path="/video/:platform/:id" element={<VideoPage />} />
       <Route path="/termsOfService" element={<TermsOfServicePage />} />
       <Route path="/privacyPolicy" element={<PrivacyPolicyPage />} />
+      <Route path="/howToUse" element={<HowToUsePage />} />
     </Routes>
   );
 }

@@ -25,7 +25,14 @@ export const CommonHeader = () => {
       justifyContent="flex-start"
     >
       <IconButton variant={"plain"} marginLeft={"10"}>
-        <Link to="/">
+        <Link
+          to="/"
+          onClick={() =>
+            // ここでリロードのフラグをリセット。
+            // Vindies のアイコンを押して SearchPage に戻った場合は、データを再取得させる
+            useNeedReloadStore.getState().setIsReloadNeeded(true)
+          }
+        >
           <Image src={vindiesIcon} borderRadius="full" boxSize={"50px"} />
         </Link>
 

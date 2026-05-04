@@ -6,6 +6,7 @@ import {
   Button,
   Flex,
   Image,
+  Link,
   Separator,
   Text,
   useDisclosure,
@@ -33,6 +34,11 @@ const VideoPage = () => {
 
   const listBoxRef = useRef<HTMLDivElement | null>(null);
   const scrollPositionRef = useRef<number>(0);
+
+  const channelUrl =
+    platform === "youtubeLiveStream"
+      ? `https://www.youtube.com/channel/${id}`
+      : `https://www.twitch.tv/${id}`;
 
   // videoStore が空の場合は useEffect で再レンダリング
   useEffect(() => {
@@ -123,13 +129,15 @@ const VideoPage = () => {
               {currentVideo.videoTitle}
             </Text>
             <Flex>
-              <Image
-                src={currentVideo.channelHighThumbnail.url}
-                alt={currentVideo.channelName}
-                boxSize="80px"
-                borderRadius="full"
-                flexShrink={0}
-              />
+              <Link href={channelUrl} target="_blank">
+                <Image
+                  src={currentVideo.channelHighThumbnail.url}
+                  alt={currentVideo.channelName}
+                  boxSize="80px"
+                  borderRadius="full"
+                  flexShrink={0}
+                />
+              </Link>
               <Text
                 fontSize="medium"
                 marginTop="30px"

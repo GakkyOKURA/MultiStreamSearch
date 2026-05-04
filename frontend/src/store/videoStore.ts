@@ -8,6 +8,7 @@ type VideoDataStore = {
   setResults: (videos: VideoDataDTO[]) => void;
 };
 
+// バックエンドから取得した動画リストを扱う
 export const useVideoDataStore = create<VideoDataStore>()(
   persist(
     (set) => ({
