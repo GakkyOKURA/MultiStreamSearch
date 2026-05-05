@@ -7,7 +7,7 @@ using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// https —p‚É CORS ‚ð’Ç‰Á
+// CORS ‚ð’Ç‰Á
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>

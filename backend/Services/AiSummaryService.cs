@@ -6,7 +6,6 @@ using MyApi.Models;
 using NJsonSchema.Generation;
 using OpenAI;
 using OpenAI.Chat;
-using System;
 using System.ClientModel;
 using System.ClientModel.Primitives;
 using System.Net;
@@ -25,7 +24,6 @@ public class AiSummaryService : IAiService
     [
         "gemini-3.1-flash-lite-preview",
         "gemini-2.5-flash-lite",
-        "gemini-2.5-flash"
     ];
 
     public AiSummaryService(
