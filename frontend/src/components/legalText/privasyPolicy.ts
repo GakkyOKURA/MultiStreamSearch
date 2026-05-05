@@ -7,11 +7,12 @@ export const PRIVACY_POLICY = `
 本サービスをご利用になる前に本ポリシーをお読みください。
 
 ### 第1条（API の利用）
-本サービスでは、動画情報・要約文を取得するために YouTube API, Twitch API, Gemini API を利用しており、
+本サービスでは、動画情報・要約文を取得するために YouTube API, Twitch API, OpenAI API を利用しており、
 各 API 提供元のプライバシーポリシーに準拠しております。
 
 * **Google / YouTube:** [Google プライバシーポリシー](https://policies.google.com/privacy)
 * **Twitch:** [Twitch プライバシー通知](https://www.twitch.tv/p/ja-jp/legal/privacy-notice/)
+* **OpenAI:** [OpenAI プライバシーポリシー](https://openai.com/ja-JP/policies/privacy-policy/)
 
 
 ### 第2条（取得する情報）

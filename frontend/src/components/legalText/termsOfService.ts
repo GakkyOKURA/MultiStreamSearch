@@ -8,19 +8,18 @@ export const TERMS_OF_SERVICE = `
 
 ### 第1条（外部APIサービスの連携と同意）
 
-1.  本サービスは、Google LLC（以下「Google」）、YouTube, LLC（以下「YouTube」）、
-およびTwitch Interactive, Inc.（以下「Twitch」）が提供するAPIを利用しています。
+1.  本サービスは、YouTube, LLC（以下「YouTube」）、
+Twitch Interactive, Inc.（以下「Twitch」）、OpenAI, Inc.（以下「OpenAI」）が提供するAPIを利用しています。
 2. ユーザーは、本サービスを利用することで、以下の各サービスの利用規約に同意したものとみなされます。
 3. 本サービスは、以下の各サービスの利用規約に準拠しています。
 
-* **Google (Gemini API):** [Google API利用規約](https://developers.google.com/terms) 
-/ [Generative AI Additional Terms of Service](https://ai.google.dev/gemini-api/terms?hl=ja)
 * **YouTube:** [YouTube利用規約](https://www.youtube.com/t/terms)
 * **Twitch:** [Twitch利用規約](https://www.twitch.tv/p/ja-jp/legal/terms-of-service/)
+* **OpenAI:** [OpenAI利用規約](https://openai.com/ja-JP/policies/terms-of-use/)
 
 ### 第2条（AI生成コンテンツの性質）
 
-1. 本サービス内のAI要約機能は、Google LLCが提供するGemini APIを利用して自動生成されます。
+1. 本サービス内のAI要約機能は、OpenAI, Inc.が提供するOpenAI APIを利用して自動生成されます。
 2. 生成された回答の正確性、信頼性、安全性について、当方は一切の保証を行いません。
 3. AIによる回答が原因で生じた損害について、当方は責任を負わないものとします。
 
@@ -42,7 +41,7 @@ export const TERMS_OF_SERVICE = `
 1. 当方は、本サービスが中断、停止、または終了したことによりユーザーに生じた損害について、一切の責任を負いません。
 特に、各APIの仕様変更や制限により機能が制限された場合も同様です。
 2. ユーザー間、またはユーザーと第三者との間で生じたトラブルについて、当方は関与しません。
-3. 本サービスは、YouTube API, Twitch API, Gemini API から取得した情報の正確性や内容について保証しません。
+3. 本サービスは、YouTube API, Twitch API, OpenAI API から取得した情報の正確性や内容について保証しません。
 4. ユーザーが本サービスを利用することによって生じた損害について、運営者は一切責任を負いません。
 
 ### 第6条（準拠法および裁判管轄）
