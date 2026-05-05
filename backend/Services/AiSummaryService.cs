@@ -47,7 +47,7 @@ public class AiSummaryService : IAiService
     public async Task<ChannelSummaryResponse> FetchVtuberAnalysis()
     {
         var vData = await GetVtuberData();
-        return await GenerateSummaryAsync_Gemini(vData);
+        return await GenerateSummaryAsync_OpenAI(vData);
     }
 
     private async Task<List<ProvideingVtuberData>> GetVtuberData()
@@ -254,11 +254,11 @@ public class AiSummaryService : IAiService
         var inputJson = JsonSerializer.Serialize(targets);
         var prompt = GetPrompt_OpenAI(inputJson);
 
-        // 1. クライアントの初期化（リトライ設定を含む）
+        // クライアントの初期化（リトライ設定を含む）
         // OpenAI SDKはデフォルトで指数バックオフのリトライ機能を持っている
         var clientOptions = new OpenAIClientOptions
         {
-            RetryPolicy = new ClientRetryPolicy(maxRetries: 5)
+            RetryPolicy = new ClientRetryPolicy(maxRetries: 5) // ここでリトライ回数を設定
         };
         var client = new ChatClient("gpt-5-mini", new ApiKeyCredential(_settings.OpenAiApiKey), clientOptions);
 
@@ -280,7 +280,7 @@ public class AiSummaryService : IAiService
         schema.AllowAdditionalProperties = false;
         var schemaString = schema.ToJson();
 
-        // 2. Structured Outputs (Strictモード) の設定
+        // Structured Outputs (Strictモード) の設定
         var options = new ChatCompletionOptions()
         {
             ResponseFormat = ChatResponseFormat.CreateJsonSchemaFormat(
@@ -292,14 +292,14 @@ public class AiSummaryService : IAiService
             )
         };
 
-        // 3. 送信
+        // 送信
         // ChatClient が 503 等のリトライを自動でハンドル
         ChatCompletion completion = await client.CompleteChatAsync(
             new List<ChatMessage> { ChatMessage.CreateUserMessage(prompt) },
             options
         );
 
-        // 4. レスポンスの取得とパース
+        // レスポンスの取得とパース
         // Strictモードでは Markdown の装飾（```json）は入らない
         var rawText = completion.Content[0].Text;
 
