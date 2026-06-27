@@ -67,7 +67,8 @@ public class YouTubeService : IYouTubeService
         var baseUrl = GetSerachListUrl();
 
         //今後 api 制限が緩和したら増やす
-        var searchCount = 2;
+        // api 増加につき 2 → 3 に変更
+        var searchCount = 3;
         var nextPageToken = "";
 
         for (var i = 0; i < searchCount; i++)

@@ -85,7 +85,8 @@ public class YouTubeLiveStreamsCacheUpdater : BackgroundService
     }
 
     //TODO: クォータ増加したら更新頻度増やす
-    // youtube は 30 分毎に更新
+    //クォータが増加したので 30 分 → 5 分に変更
+    // youtube は 5 分毎に更新
     private TimeSpan GetDelayUntilNextUpdate()
     {
         var now = DateTime.Now;
@@ -98,7 +99,7 @@ public class YouTubeLiveStreamsCacheUpdater : BackgroundService
             now.Hour,
             now.Minute,
             0
-        ).AddMinutes(30);
+        ).AddMinutes(5);
 
         return next - now;
     }
