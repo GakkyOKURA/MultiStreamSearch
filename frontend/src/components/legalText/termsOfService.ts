@@ -50,6 +50,7 @@ Twitch Interactive, Inc.（以下「Twitch」）、OpenAI, Inc.（以下「OpenA
 
 ### 第7条（お問い合わせ先）
 
-本規約に関するお問い合わせは、以下までご連絡ください。
-[X（旧Twitter）: ](https://x.com/MASAO_koikoi)
+本規約に関するお問い合わせは、以下までご連絡ください。 \n
+Email: vindies@outlook.jp \n
+X（旧Twitter）: https://x.com/MASAO_koikoi
 `;

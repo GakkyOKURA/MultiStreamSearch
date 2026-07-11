@@ -73,23 +73,38 @@ public class TwitchService : ITwitchService
 
     public async Task<VideoDataResponse> FetchTwitchStreamsAsync()
     {
-        // まずは配信を取得
-        var streamResponse = await GetVtuberTwitchStreamsAsync();
-        if(streamResponse.Data.Count == 0)
+        var result = new VideoDataResponse();
+        TwitchStreamPaginationRaw? oldPagination = null;
+        // 結果を 100 個取得できるまでループ
+        // while が適切だが無限ループが怖いので for にしとく
+        for (var i = 0; i < 5; i++)
         {
-            return new();
+            // まずは配信を取得
+            var streamResponse = await GetVtuberTwitchStreamsAsync(oldPagination);
+            // pagination を更新
+            oldPagination = streamResponse.Pagination;
+
+            // 次にチャンネル情報を取得
+            var channelResponse = await GetChannelInformationAsync(streamResponse.Data);
+
+            // dto の形に整形
+            var dto = ToDTO(streamResponse.Data, channelResponse.Data);
+
+            result.Items.AddRange(dto.Items);
+            // 100 個取得できた or pagination が切れたら beak
+            if (result.Items.Count >= 100 || string.IsNullOrEmpty(oldPagination.Cursor))
+            {
+                result.Items = result.Items
+                    .Take(100)
+                    .ToList();
+                break;
+            }
         }
 
-        // 次にチャンネル情報を取得
-        var channelResponse = await GetChannelInformationAsync(streamResponse.Data);
-
-        // dto の形に整形
-        var dto = ToDTO(streamResponse.Data, channelResponse.Data);
-
-        return dto;
+        return result;
     }
 
-    private async Task<TwitchStreamSearchResponse> GetVtuberTwitchStreamsAsync()
+    private async Task<TwitchStreamSearchResponse> GetVtuberTwitchStreamsAsync(TwitchStreamPaginationRaw? oldPaination = null)
     {
         var token = await GetAccessTokenAsync();
 
@@ -98,9 +113,8 @@ public class TwitchService : ITwitchService
             "?language=ja" +
             "&first=100";
 
-        var maxSearchRoop = 150;
-        var maxVideoCount = 150;
-        var pagination = new TwitchStreamPaginationRaw();
+        var maxSearchRoop = 20;
+        var pagination = oldPaination ?? new TwitchStreamPaginationRaw();
         var data = new List<TwitchStreamSearchRaw>();
         for (var i = 0; i < maxSearchRoop; i++)
         {
@@ -111,12 +125,12 @@ public class TwitchService : ITwitchService
                 url += $"&after={pagination.Cursor}";
             }
 
-            // 最大 150 回ループ。 許容範囲
+            // 最大 20 回ループ。 許容範囲
             var (httpResponse, msg) = await GetHttpResponseWithRetryAsync(url, token, "get streams");
             if (httpResponse is null)
             {
                 ShowLog(msg);
-                break;
+                continue;
             }
 
             using (httpResponse)
@@ -127,7 +141,7 @@ public class TwitchService : ITwitchService
                 var searchResponse = JsonSerializer.Deserialize<TwitchStreamSearchResponse>(json);
                 if (searchResponse is null)
                 {
-                    break;
+                    return new();
                 }
 
                 pagination = searchResponse.Pagination;
@@ -148,14 +162,11 @@ public class TwitchService : ITwitchService
                     .DistinctBy(v => v.Id)
                     .ToList();
 
-                // data が 150 を超えた場合は cursor が残ってても break
+                // data が 100 を超えた場合は cursor が残ってても break
                 // cursor が無くなった = 最後まで検索された場合は break
                 // 重複でカウントが加算されるのはよくないので DistinctBy した後にカウントの確認
-                if (data.Count >= maxVideoCount || string.IsNullOrEmpty(pagination.Cursor))
+                if (data.Count >= 100 || string.IsNullOrEmpty(pagination.Cursor))
                 {
-                    data = data
-                        .Take(maxVideoCount)
-                        .ToList();
                     break;
                 }
             }
@@ -189,6 +200,11 @@ public class TwitchService : ITwitchService
 
     private async Task<TwitchUserResponse> GetChannelInformationAsync(List<TwitchStreamSearchRaw> data)
     {
+        if (data.Count == 0)
+        {
+            return new TwitchUserResponse();
+        }
+
         var token = await GetAccessTokenAsync();
         var allUsers = new List<TwitchUserRaw>(); // 全結果を格納するリスト
 
