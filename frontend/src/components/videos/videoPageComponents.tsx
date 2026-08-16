@@ -2,6 +2,7 @@ import { AspectRatio } from "@chakra-ui/react";
 import { useEffect, useRef } from "react";
 import type { VideoDataDTO } from "./videoData";
 import VideoCard from "./videoCard";
+import { isLocalhost } from "../common/IsLocalHost";
 
 export const VideoPlayer = ({
   platform,
@@ -14,8 +15,7 @@ export const VideoPlayer = ({
     return <div>Invalid video URL</div>;
   }
 
-  // 開発時は env.development の値を使用
-  const parent = import.meta.env.VITE_TWITCH_PARENT ?? "vindies.jp";
+  const parent = isLocalhost() ? "localhost" : "vindies.jp";
 
   if (platform === "youtubeLiveStream") {
     return (
