@@ -16,6 +16,7 @@ namespace MyApi.Services;
 public class AiSummaryService : IAiService
 {
     private readonly IRedisCacheService _cache;
+    private readonly IHostEnvironment _environment;
     private readonly HttpClient _httpClient;
     private readonly AiApiSettings _settings;
     private readonly ILogger<AiSummaryService> _logger;
@@ -28,11 +29,13 @@ public class AiSummaryService : IAiService
 
     public AiSummaryService(
         IRedisCacheService cache,
+        IHostEnvironment hostEnvironment,
         HttpClient httpClient, // SDK の Client から HttpClient に変更
         IOptions<AiApiSettings> settings,
         ILogger<AiSummaryService> logger)
     {
         _cache = cache;
+        _environment = hostEnvironment;
         _httpClient = httpClient;
         _settings = settings.Value;
         _logger = logger;
@@ -47,6 +50,16 @@ public class AiSummaryService : IAiService
     public async Task<ChannelSummaryResponse> FetchVtuberAnalysis()
     {
         var vData = await GetVtuberData();
+
+        if (_environment.IsDevelopment())
+        {
+            var raws = vData
+                .Select(v => new ChannelSummaryRaw { Id = v.ChannelId, Description = "テスト" })
+                .ToList();
+
+            return new() { Analyses = raws };
+        }
+
         return await GenerateSummaryAsync_OpenAI(vData);
     }
 

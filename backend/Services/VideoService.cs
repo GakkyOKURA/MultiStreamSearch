@@ -49,14 +49,18 @@ public class VideoService : IVideoService
 
     public async Task<VideoWithSummaryResponse> SearchVideoWithAnalysisAsync()
     {
-        var geminiResponse = await _aiService.SearchVtuberAnalysis();
+        var aiResponse = await _aiService.SearchVtuberAnalysis();
 
         var videoResponses = await GetVideoResponses();
-        var combinedList = videoResponses.ytResponse.Items.Concat(videoResponses.twResponse.Items).ToList();
-        var videoDataDict = combinedList.ToDictionary(v => v.ChannelId);
+        var combinedList = videoResponses.ytResponse.Items
+            .Concat(videoResponses.twResponse.Items)
+            .ToList();
+        var videoDataDict = combinedList
+            .DistinctBy(v => v.ChannelId)
+            .ToDictionary(v => v.ChannelId);
         var result = new VideoWithSummaryResponse();
 
-        foreach (var analysis in geminiResponse.Analyses)
+        foreach (var analysis in aiResponse.Analyses)
         {
             if (videoDataDict.TryGetValue(analysis.Id, out var data))
             {

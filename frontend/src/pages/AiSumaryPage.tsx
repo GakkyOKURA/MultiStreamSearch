@@ -16,6 +16,12 @@ const SearchSummaryPage = () => {
     const load = async () => {
       const data = await SearchVideoWithAnalysis();
       setVideoWithAnalysisDataResults(data);
+
+      // スクロールをトップへ
+      window.scrollTo({
+        top: 0,
+        behavior: "instant",
+      });
     };
     load();
   }, []); // 空配列で初回だけ実行の合図

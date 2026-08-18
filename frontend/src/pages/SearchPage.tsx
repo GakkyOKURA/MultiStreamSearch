@@ -42,6 +42,7 @@ const SearchPage = () => {
         return;
       }
 
+      // 新しい動画データを取得してセット
       const data = await SearchVideoData();
       setVideoDataResults(data);
 
