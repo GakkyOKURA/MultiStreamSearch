@@ -61,7 +61,7 @@ jobs:
       # 古いイメージを自動削除して、ストレージが無限に溜まらないようにする
       - uses: actions/delete-package-versions@v4
         with:
-          package-name: "MultiStreamSearch/backend" # ← GitHubのPackagesタブで実際の名前を確認して合わせる
+          package-name: "multistreamsearch/backend" # ← GitHubのPackagesタブで実際の名前を確認して合わせる
           package-type: "container"
           min-versions-to-keep: 5 # 直近5個だけ残して、それより古いものは削除
 
@@ -101,7 +101,7 @@ jobs:
 
       - uses: actions/delete-package-versions@v4
         with:
-          package-name: "MultiStreamSearch/nginx" # ← GitHubのPackagesタブで実際の名前を確認して合わせる
+          package-name: "multistreamsearch/nginx" # ← GitHubのPackagesタブで実際の名前を確認して合わせる
           package-type: "container"
           min-versions-to-keep: 5
 
