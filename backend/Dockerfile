@@ -17,6 +17,8 @@ COPY --from=build /app .
 COPY wait-for-it.sh /wait-for-it.sh
 RUN chmod +x /wait-for-it.sh
 
+# ENTRYPOINT の行以外は ビルド時に実行される。
+# ENTRYPOINT 行はコンテナが起動したときに実行される
 # DB が起動するまで待ってから backend を起動
 ENTRYPOINT ["/wait-for-it.sh", "db", "5432", "dotnet", "MyApi.dll"]
 

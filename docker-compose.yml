@@ -18,8 +18,7 @@ services:
       - app-net
 
   backend:
-    build:
-      context: ./backend
+    image: ghcr.io/gakkyokura/multistreamsearch/backend:latest
     container_name: vtuber-backend
     environment:
       - ASPNETCORE_URLS=http://+:80
@@ -30,9 +29,7 @@ services:
       - app-net
 
   nginx:
-    build:
-      context: .
-      dockerfile: ./nginx/Dockerfile
+    image: ghcr.io/gakkyokura/multistreamsearch/nginx:latest
     container_name: vtuber-nginx
     ports:
       - "80:80"

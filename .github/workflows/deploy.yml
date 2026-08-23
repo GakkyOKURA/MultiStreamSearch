@@ -1,0 +1,120 @@
+# ワークフロー全体の名前(GitHubのActionsタブに表示される)
+name: Build and Deploy
+
+# このワークフローがいつ実行されるかを定義
+on:
+  # mainブランチにpushされたら自動実行
+  push:
+    branches: [main]
+  # 手動実行もできるようにする(GitHubのActionsタブから「Run workflow」ボタンで実行可能)
+  workflow_dispatch:
+    inputs:
+      # 手動実行時、どのブランチ/タグ/コミットをビルドするか指定できる入力欄
+      # 例: バグが出た時に前のバージョンに戻してビルドし直したい場合などに使う
+      ref:
+        description: "ビルド対象のブランチ・タグ・コミットSHA"
+        required: false
+        default: "main"
+        type: string
+
+# ワークフロー全体で使い回す変数
+env:
+  REGISTRY: ghcr.io # GitHub Container Registry(イメージの保存先)
+
+jobs:
+  # ---------------------------------------------------
+  # ジョブ1: バックエンド(ASP.NET)のイメージをビルドしてpush
+  # ---------------------------------------------------
+  build-backend:
+    runs-on: ubuntu-latest # GitHubが用意するクリーンな仮想マシン上で実行される
+    permissions:
+      contents: read # リポジトリのコードを読む権限
+      packages: write # ghcr.ioにイメージをpushする権限
+    steps:
+      # リポジトリのコードをこの仮想マシンにチェックアウト(コピー)する
+      - uses: actions/checkout@v4
+        with:
+          # workflow_dispatchで指定があればそれを、無ければ通常のpush時のブランチを使う
+          ref: ${{ github.event.inputs.ref || github.ref }}
+
+      # ghcr.ioにログインする(pushするために必要)
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }} # 実行者(自分)のGitHubユーザー名
+          password: ${{ secrets.GITHUB_TOKEN }} # GitHubが自動発行する一時トークン(自分で登録不要)
+
+      # backend/Dockerfileを使ってビルドし、ghcr.ioにpushする
+      - uses: docker/build-push-action@v5
+        with:
+          context: ./backend # backend/Dockerfileがあるディレクトリ
+          push: true
+          # ↓ latest(常に最新)と、コミットハッシュ付きタグ(過去のバージョンを特定するため)の2つを付与
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository }}/backend:latest
+            ${{ env.REGISTRY }}/${{ github.repository }}/backend:${{ github.sha }}
+
+      # 古いイメージを自動削除して、ストレージが無限に溜まらないようにする
+      - uses: actions/delete-package-versions@v4
+        with:
+          package-name: "MultiStreamSearch/backend" # ← GitHubのPackagesタブで実際の名前を確認して合わせる
+          package-type: "container"
+          min-versions-to-keep: 5 # 直近5個だけ残して、それより古いものは削除
+
+  # ---------------------------------------------------
+  # ジョブ2: nginx(フロントエンドのビルド成果物込み)のイメージをビルドしてpush
+  # ---------------------------------------------------
+  build-nginx:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.ref || github.ref }}
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # nginx/DockerfileはNode.jsでフロントをビルド→nginxに配置、という2段階構成になっている
+      - uses: docker/build-push-action@v5
+        with:
+          # frontend, nginx ディレクトリを見る必要があるので context は .(ルート)とする
+          context: .
+          file: ./nginx/Dockerfile # 使用するDockerfileのパス
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository }}/nginx:latest
+            ${{ env.REGISTRY }}/${{ github.repository }}/nginx:${{ github.sha }}
+
+      - uses: actions/delete-package-versions@v4
+        with:
+          package-name: "MultiStreamSearch/nginx" # ← GitHubのPackagesタブで実際の名前を確認して合わせる
+          package-type: "container"
+          min-versions-to-keep: 5
+
+  # ---------------------------------------------------
+  # ジョブ3: VPSにSSH接続して、新しいイメージをpullし、コンテナを再起動
+  # ---------------------------------------------------
+  # deploy:
+  #   # backendとnginx、両方のビルドが成功してから実行する
+  #   needs: [build-backend, build-nginx]
+  #   runs-on: ubuntu-latest
+  #   # このジョブで使うSecrets(VPS_HOST等)を production環境に紐づけて管理する
+  #   environment: production
+  #   steps:
+  #     - name: Deploy to VPS
+  #       uses: appleboy/ssh-action@v1
+  #       with:
+  #         host: ${{ secrets.VPS_HOST }}       # 例: vindies.jp
+  #         username: ${{ secrets.VPS_USER }}   # 例: ubuntu
+  #         key: ${{ secrets.VPS_SSH_KEY }}     # デプロイ専用に発行したSSH秘密鍵
+  #         # ↓ cd コマンドで指定するパスは VPS上の実際のプロジェクトディレクトリのパスに変更する
+  #         script: |
+  #           cd /path/to/vindies
+  #           docker compose pull
+  #           docker compose up -d
