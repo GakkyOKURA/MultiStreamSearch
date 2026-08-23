@@ -1,29 +1,27 @@
 ﻿using MyApi.DTOs;
 using MyApi.Interfaces;
+using MyApi.Models;
 
 namespace MyApi.Services;
 
 public class VideoService : IVideoService
 {
-    private readonly IYouTubeService _youTubeService;
-    private readonly ITwitchService _twitchService;
-    private readonly IAiService _aiService;
-    public VideoService(
-        IYouTubeService youTubeService,
-        ITwitchService twitchService,
-        IAiService aiService)
+    private readonly IRedisCacheService _redisCacheService;
+
+    public VideoService(IRedisCacheService redisCacheService)
     {
-        _youTubeService = youTubeService;
-        _twitchService = twitchService;
-        _aiService = aiService;
+        _redisCacheService = redisCacheService;
     }
 
     public async Task<VideoDataResponse> SearchVideoAsync()
     {
-        var responses = await GetVideoResponses();
+        //var responses = await GetVideoResponses();
 
-        var youtubeItems = responses.ytResponse.Items;
-        var twitchItems = responses.twResponse.Items;
+        var youtubeResponse = await GetYouTubeFromCache();
+        var twitchResponse = await GetTwitchFromCache();
+
+        var youtubeItems = youtubeResponse.Items;
+        var twitchItems = twitchResponse.Items;
 
         var combinedItems = new List<VideoDataDTO>();
         var maxCount = Math.Max(youtubeItems.Count, twitchItems.Count);
@@ -49,11 +47,15 @@ public class VideoService : IVideoService
 
     public async Task<VideoWithSummaryResponse> SearchVideoWithAnalysisAsync()
     {
-        var aiResponse = await _aiService.SearchVtuberAnalysis();
+        //var aiResponse = await _aiService.SearchVtuberAnalysis();
+        var aiResponse = await GetAiSummaryFromCache();
 
-        var videoResponses = await GetVideoResponses();
-        var combinedList = videoResponses.ytResponse.Items
-            .Concat(videoResponses.twResponse.Items)
+        var youtubeResponse = await GetYouTubeFromCache();
+        var twitchResponse = await GetTwitchFromCache();
+
+        //var videoResponses = await GetVideoResponses();
+        var combinedList = youtubeResponse.Items
+            .Concat(twitchResponse.Items)
             .ToList();
         var videoDataDict = combinedList
             .DistinctBy(v => v.ChannelId)
@@ -91,10 +93,28 @@ public class VideoService : IVideoService
         return result;
     }
 
-    private async Task<(VideoDataResponse ytResponse, VideoDataResponse twResponse)> GetVideoResponses()
+    //private async Task<(VideoDataResponse ytResponse, VideoDataResponse twResponse)> GetVideoResponses()
+    //{
+    //    var youtubeResponse = await _youTubeService.SearchYouTubeLiveStreamsAsync();
+    //    var twitchResponse = await _twitchService.SearchTwitchStreamsAsync();
+    //    return(youtubeResponse, twitchResponse);
+    //}
+
+    private async Task<VideoDataResponse> GetYouTubeFromCache()
     {
-        var youtubeResponse = await _youTubeService.SearchYouTubeLiveStreamsAsync();
-        var twitchResponse = await _twitchService.SearchTwitchStreamsAsync();
-        return(youtubeResponse, twitchResponse);
+        var cacheKey = CacheKeyHelper.GetCacheKey(VideoType.YouTubeLiveStream);
+        return await _redisCacheService.GetAsync<VideoDataResponse>(cacheKey) ?? new();
+    }
+
+    private async Task<VideoDataResponse> GetTwitchFromCache()
+    {
+        var cacheKey = CacheKeyHelper.GetCacheKey(VideoType.TwitchStream);
+        return await _redisCacheService.GetAsync<VideoDataResponse>(cacheKey) ?? new();
+    }
+
+    private async Task<ChannelSummaryResponse> GetAiSummaryFromCache()
+    {
+        var cacheKey = CacheKeyHelper.GetCacheKey(VideoType.AiSummary);
+        return await _redisCacheService.GetAsync<ChannelSummaryResponse>(cacheKey) ?? new();
     }
 }

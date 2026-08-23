@@ -11,20 +11,17 @@ namespace MyApi.Services;
 public class TwitchService : ITwitchService
 {
     private readonly IRedisCacheService _cache;
-    private readonly IHostEnvironment _environment;
     private readonly HttpClient _httpClient;
     private readonly TwitchApiSettings _settings;
     private readonly ILogger<TwitchService> _logger;
 
     public TwitchService(
         IRedisCacheService cache,
-        IHostEnvironment hostEnvironment,
         HttpClient httpClient,
         IOptions<TwitchApiSettings> settings,
         ILogger<TwitchService> logger)
     {
         _cache = cache;
-        _environment = hostEnvironment;
         _httpClient = httpClient;
         _settings = settings.Value;
         _logger = logger;
@@ -68,19 +65,8 @@ public class TwitchService : ITwitchService
         return token;
     }
 
-    public async Task<VideoDataResponse> SearchTwitchStreamsAsync()
-    {
-        var cacheKey = CacheKeyHelper.GetCacheKey(VideoType.TwitchStream);
-        return await _cache.GetAsync<VideoDataResponse>(cacheKey) ?? new();
-    }
-
     public async Task<VideoDataResponse> FetchTwitchStreamsAsync()
     {
-        if (_environment.IsDevelopment())
-        {
-            return CreateDataForDebug();
-        }
-
         var result = new VideoDataResponse();
         TwitchStreamPaginationRaw? oldPagination = null;
         // 結果を 100 個取得できるまでループ
@@ -361,40 +347,5 @@ public class TwitchService : ITwitchService
     {
         var time = DateTime.Now;
         _logger.LogInformation("\n{Time}{Message}\n", time, message);
-    }
-
-    private VideoDataResponse CreateDataForDebug()
-    {
-        var dtos = new List<VideoDataDTO>();
-        for (var i = 0; i < 10; i++)
-        {
-            var d = new VideoDataDTO
-            {
-                VideoId = "",
-                VideoTitle = "テスト",
-                ChannelId = "akamikarubi",
-                ChannelName = "テスト",
-                SearchHighTumbnail = new VideoHighThumbnailDTO
-                {
-                    Url = $"https://static-cdn.jtvnw.net/previews-ttv/live_user_ukyochi_jp-1280x720.jpg",
-                    Width = 1280,
-                    Height = 720,
-                },
-                ChannelHighThumbnail = new VideoHighThumbnailDTO
-                {
-                    Url = $"https://static-cdn.jtvnw.net/jtv_user_pictures/f5ba0ca0-2187-41ea-b7bb-d0457b1dba0e-profile_image-70x70.png",
-                    Width = 300,
-                    Height = 300,
-                },
-                Platform = VIdeoPlatform.Twitch
-            };
-
-            dtos.Add(d);
-        }
-
-        return new()
-        {
-            Items = dtos,
-        };
     }
 }

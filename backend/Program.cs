@@ -3,6 +3,7 @@ using MyApi.Endpoints;
 using MyApi.Interfaces;
 using MyApi.Services;
 using MyApi.Services.CacheUpdater;
+using MyApi.Services.Mocks;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -42,9 +43,20 @@ builder.Services.AddSingleton<IVtuberRepository>(sp =>
     return new VtuberRepository(config!);
 });
 
-builder.Services.AddHttpClient<IYouTubeService, YouTubeService>();
-builder.Services.AddHttpClient<ITwitchService, TwitchService>();
-builder.Services.AddHttpClient<IAiService, AiSummaryService>();
+// debugの時は Mock データを使う
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddSingleton<IYouTubeService, YouTubeServiceMock>();
+    builder.Services.AddSingleton<ITwitchService, TwitchServiceMock>();
+    builder.Services.AddSingleton<IAiService, AiSummaryServiceMock>();
+}
+else
+{
+    builder.Services.AddHttpClient<IYouTubeService, YouTubeService>();
+    builder.Services.AddHttpClient<ITwitchService, TwitchService>();
+    builder.Services.AddHttpClient<IAiService, AiSummaryService>();
+}
+
 builder.Services.AddScoped<IVideoService, VideoService>();
 
 // YouTube のキャッシュ更新サービスを追加

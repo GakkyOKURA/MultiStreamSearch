@@ -14,33 +14,20 @@ namespace MyApi.Services;
 public class YouTubeService : IYouTubeService
 {
     private readonly IRedisCacheService _cache;
-    private readonly IHostEnvironment _environment;
     private readonly HttpClient _httpClient;
     private readonly YouTubeApiSettings _settings;
     private readonly ILogger<YouTubeService> _logger;
 
     public YouTubeService(
         IRedisCacheService cache,
-        IHostEnvironment hostEnvironment,
         HttpClient httpClient,
         IOptions<YouTubeApiSettings> settings,
         ILogger<YouTubeService> logger)
     {
         _cache = cache;
-        _environment = hostEnvironment;
         _httpClient = httpClient;
         _settings = settings.Value;
         _logger = logger;
-    }
-
-    /// <summary>
-    /// キャッシュに保存されている配信データを渡す
-    /// </summary>
-    /// <returns></returns>
-    public async Task<VideoDataResponse> SearchYouTubeLiveStreamsAsync()
-    {
-        var cacheKey = CacheKeyHelper.GetCacheKey(VideoType.YouTubeLiveStream);
-        return await _cache.GetAsync<VideoDataResponse>(cacheKey) ?? new();
     }
 
     /// <summary>
@@ -49,11 +36,6 @@ public class YouTubeService : IYouTubeService
     /// <returns></returns>
     public async Task<VideoDataResponse> FetchYouTubeLiveStreamsAsync()
     {
-        if (_environment.IsDevelopment())
-        {
-            return CreateDataForDebug();
-        }
-
         // まずは配信を取得
         var searchResponse = await GetYouTubeLiveStreamsAsync();
         if (searchResponse.Items.Count == 0)
@@ -308,40 +290,5 @@ public class YouTubeService : IYouTubeService
     {
         var time = DateTime.Now;
         _logger.LogInformation("\n{Time}{Message}\n", time, message);
-    }
-
-    private VideoDataResponse CreateDataForDebug()
-    {
-        var dtos = new List<VideoDataDTO>();
-        for (var i = 0; i < 10; i++)
-        {
-            var d = new VideoDataDTO
-            {
-                VideoId = "ADrIqotgdyM",
-                VideoTitle = "テスト",
-                ChannelId = "UCt30jJgChL8qeT9VPadidSw",
-                ChannelName = "テスト",
-                SearchHighTumbnail = new VideoHighThumbnailDTO
-                {
-                    Url = $"https://i.ytimg.com/vi/ADrIqotgdyM/hq720.jpg",
-                    Width = 1280,
-                    Height = 720,
-                },
-                ChannelHighThumbnail = new VideoHighThumbnailDTO
-                {
-                    Url = $"https://yt3.googleusercontent.com/ytc/AIdro_m6xQ9ez0I8lnwswHqAns9ZRPsaCCutfzu6eUbM7pwzqsA=s160-c-k-c0x00ffffff-no-rj",
-                    Width = 800,
-                    Height = 800,
-                },
-                Platform = VIdeoPlatform.YouTube
-            };
-
-            dtos.Add(d);
-        }
-
-        return new()
-        {
-            Items = dtos,
-        };
     }
 }

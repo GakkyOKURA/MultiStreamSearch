@@ -16,7 +16,6 @@ namespace MyApi.Services;
 public class AiSummaryService : IAiService
 {
     private readonly IRedisCacheService _cache;
-    private readonly IHostEnvironment _environment;
     private readonly HttpClient _httpClient;
     private readonly AiApiSettings _settings;
     private readonly ILogger<AiSummaryService> _logger;
@@ -29,37 +28,19 @@ public class AiSummaryService : IAiService
 
     public AiSummaryService(
         IRedisCacheService cache,
-        IHostEnvironment hostEnvironment,
         HttpClient httpClient, // SDK の Client から HttpClient に変更
         IOptions<AiApiSettings> settings,
         ILogger<AiSummaryService> logger)
     {
         _cache = cache;
-        _environment = hostEnvironment;
         _httpClient = httpClient;
         _settings = settings.Value;
         _logger = logger;
     }
 
-    public async Task<ChannelSummaryResponse> SearchVtuberAnalysis()
-    {
-        var cacheKey = CacheKeyHelper.GetCacheKey(VideoType.AiSummary);
-        return await _cache.GetAsync<ChannelSummaryResponse>(cacheKey) ?? new();
-    }
-
     public async Task<ChannelSummaryResponse> FetchVtuberAnalysis()
     {
         var vData = await GetVtuberData();
-
-        if (_environment.IsDevelopment())
-        {
-            var raws = vData
-                .Select(v => new ChannelSummaryRaw { Id = v.ChannelId, Description = "テスト" })
-                .ToList();
-
-            return new() { Analyses = raws };
-        }
-
         return await GenerateSummaryAsync_OpenAI(vData);
     }
 
@@ -89,14 +70,12 @@ public class AiSummaryService : IAiService
         return youtubeData.Items.Concat(twitchData.Items).ToList();
     }
 
-    // YouTubeService.SearchYouTubeLiveStreamsAsync との DRY 原則には違反していない
     private async Task<VideoDataResponse> GetYouTubeLiveStreamsAsync()
     {
         var cacheKey = CacheKeyHelper.GetCacheKey(VideoType.YouTubeLiveStream);
         return await _cache.GetAsync<VideoDataResponse>(cacheKey) ?? new();
     }
 
-    // TwitchService.SearchTwitchStreamsAsync との DRY 原則には違反していない
     private async Task<VideoDataResponse> GetTwitchStreamsAsync()
     {
         var cacheKey = CacheKeyHelper.GetCacheKey(VideoType.TwitchStream);
