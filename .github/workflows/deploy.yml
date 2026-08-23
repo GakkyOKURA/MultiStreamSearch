@@ -37,6 +37,10 @@ jobs:
           # workflow_dispatchで指定があればそれを、無ければ通常のpush時のブランチを使う
           ref: ${{ github.event.inputs.ref || github.ref }}
 
+      # リポジトリ名を小文字に変換して、環境変数として使えるようにする
+      - name: Set lowercase repository name
+        run: echo "REPO_LC=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       # ghcr.ioにログインする(pushするために必要)
       - uses: docker/login-action@v3
         with:
@@ -51,8 +55,8 @@ jobs:
           push: true
           # ↓ latest(常に最新)と、コミットハッシュ付きタグ(過去のバージョンを特定するため)の2つを付与
           tags: |
-            ${{ env.REGISTRY }}/${{ github.repository }}/backend:latest
-            ${{ env.REGISTRY }}/${{ github.repository }}/backend:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.REPO_LC }}/backend:latest
+            ${{ env.REGISTRY }}/${{ env.REPO_LC }}/backend:${{ github.sha }}
 
       # 古いイメージを自動削除して、ストレージが無限に溜まらないようにする
       - uses: actions/delete-package-versions@v4
@@ -74,6 +78,10 @@ jobs:
         with:
           ref: ${{ github.event.inputs.ref || github.ref }}
 
+      # リポジトリ名を小文字に変換して、環境変数として使えるようにする
+      - name: Set lowercase repository name
+        run: echo "REPO_LC=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       - uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -88,8 +96,8 @@ jobs:
           file: ./nginx/Dockerfile # 使用するDockerfileのパス
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ github.repository }}/nginx:latest
-            ${{ env.REGISTRY }}/${{ github.repository }}/nginx:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.REPO_LC }}/nginx:latest
+            ${{ env.REGISTRY }}/${{ env.REPO_LC }}/nginx:${{ github.sha }}
 
       - uses: actions/delete-package-versions@v4
         with:
