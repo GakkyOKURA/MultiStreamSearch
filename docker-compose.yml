@@ -23,6 +23,8 @@ services:
     environment:
       - ASPNETCORE_URLS=http://+:80
       - ASPNETCORE_ENVIRONMENT=Docker
+    volumes:
+      - ./backend/appsettings.Docker.json:/app/appsettings.Docker.json:ro
     expose:
       - "80"
     networks:

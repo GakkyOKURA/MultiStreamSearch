@@ -1,6 +1,9 @@
 # ビルド
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
+# backend フォルダの中身をすべてイメージ内の /src にコピー
+# appsettings.Docker.json はリポジトリ内には存在しないので、
+# docker-compose.yml でマウントする
 COPY . .
 RUN dotnet publish -c Release -o /app
 

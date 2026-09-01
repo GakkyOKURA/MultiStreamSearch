@@ -80,6 +80,12 @@ GitHub Actions で Docker イメージのビルドを自動化。VPSへのデプ
 
 ---
 
+## 留意点
+
+- **設定ファイルのマウント漏れに注意**: CI/CD導入前はビルド環境と実行環境が同じVPS上だったため、`appsettings.Docker.json` を配置しておくだけで `Dockerfile` の `COPY` 経由で自然に読み込まれていた。GitHub Actions でのビルドに移行し、ビルド環境(GitHubのランナー)と実行環境(VPS)が分離された結果、この依存関係が表面化。`appsettings.Docker.json` はセキュリティ上イメージに含められないため、`docker-compose.yml` 側で `volumes` によるマウント設定を追加した。
+
+---
+
 ## ローカル開発環境のセットアップ
 
 ```bash
